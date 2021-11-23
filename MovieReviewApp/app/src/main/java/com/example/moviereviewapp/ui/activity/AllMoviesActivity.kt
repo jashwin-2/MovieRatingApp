@@ -15,10 +15,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.moviereviewapp.R
 import com.example.moviereviewapp.model.Movie
 import com.example.moviereviewapp.model.MovieListResponse
+import com.example.moviereviewapp.ui.activity.MovieDetailActivity
 import com.example.moviereviewapp.ui.adapter.AllMovieListAdapter
 import com.example.moviereviewapp.ui.adapter.MovieListAdapter
 import com.example.moviereviewapp.ui.fragments.HomeFragment
 import com.example.moviereviewapp.ui.fragments.SearchFragment.Companion.GENRE_ID
+import com.example.moviereviewapp.ui.fragments.SelectGenreFragment
 import com.example.moviereviewapp.ui.viewModel.MovieViewModel
 import com.example.moviereviewapp.utils.MyScrollListener
 import com.example.moviereviewapp.utils.Resource
@@ -28,6 +30,7 @@ import kotlinx.android.synthetic.main.toolbar.view.*
 class AllMoviesActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickListener {
     lateinit var movieViewModel: MovieViewModel
     lateinit var adapter: AllMovieListAdapter
+    lateinit var allGenreFragment: SelectGenreFragment
     var type: Int = 0
     var genreId = 0
     lateinit var recyclerView: RecyclerView

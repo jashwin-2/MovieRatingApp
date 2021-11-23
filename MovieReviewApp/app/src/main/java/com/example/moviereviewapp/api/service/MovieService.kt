@@ -1,11 +1,9 @@
 package com.example.moviereviewapp.api.service
 
-import com.example.moviereviewapp.model.MovieFullDetail
-import com.example.moviereviewapp.model.MovieListResponse
+import com.example.moviereviewapp.model.*
 import retrofit2.Response
-import retrofit2.http.GET
-import retrofit2.http.Path
-import retrofit2.http.Query
+import retrofit2.http.*
+import javax.sql.StatementEvent
 
 interface MovieService {
     @GET("3/movie/{Type}")
@@ -54,6 +52,37 @@ interface MovieService {
         @Query("api_key") key: String,
         @Query("page") genrePageCount: Int
     ): Response<MovieListResponse>
+
+
+    @POST("3/account/{account_id}/favorite")
+    suspend fun addOrRemoveMovieToFavorite(
+        @Path("account_id") id: Int,
+        @Body favoriteBody: FavoriteBody,
+        @Query("api_key") key: String,
+        @Query("session_id") sessionId: String,
+    ) : Response<Unit>
+
+    @POST("3/account/{account_id}/watchlist")
+    suspend fun addOrRemoveMovieToWatchList(
+        @Path("account_id") id: Int,
+        @Body watchListBody: WatchListBody,
+        @Query("api_key") key: String,
+        @Query("session_id") sessionId: String
+    ):Response<Unit>?
+
+    @POST("3/movie/{movie_id}/rating")
+    suspend fun rateTheMovie(
+        @Path("movie_id") movieId : Int,
+        @Query("api_key") key: String,
+        @Query("session_id") sessionId: String,
+        @Body rating: Rating
+    ) : Response<Unit>?
+
+    @GET("3/genre/movie/list")
+    suspend fun getAllGenres(
+        @Query("api_key") key: String,
+        @Query("language") lang: String = "language=en-US"
+        ) : Response<GenreListResponse>
 
 }
 

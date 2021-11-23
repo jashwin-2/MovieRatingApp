@@ -12,9 +12,7 @@ import com.example.moviereviewapp.R
 import com.example.moviereviewapp.ui.viewModel.MovieViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.moviereviewapp.model.Movie
-import com.example.moviereviewapp.model.MovieFullDetail
 import com.example.moviereviewapp.model.MovieListResponse
 import com.example.moviereviewapp.ui.activity.AllMoviesActivity
 import com.example.moviereviewapp.ui.activity.AllMoviesActivity.Companion.NOW_PLAYING
@@ -24,11 +22,11 @@ import com.example.moviereviewapp.ui.activity.AllMoviesActivity.Companion.SELECT
 import com.example.moviereviewapp.ui.activity.AllMoviesActivity.Companion.TOP_RATED
 import com.example.moviereviewapp.ui.activity.AllMoviesActivity.Companion.UPCOMING
 import com.example.moviereviewapp.ui.activity.MovieDetailActivity
+import com.example.moviereviewapp.ui.activity.ProfileActivity
 import com.example.moviereviewapp.ui.adapter.MovieListAdapter
 import com.example.moviereviewapp.utils.Resource
 import com.example.moviereviewapp.utils.SessionManager
 import com.facebook.shimmer.ShimmerFrameLayout
-import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_home.view.*
 import kotlinx.android.synthetic.main.movie_list_layout.view.*
 
@@ -58,7 +56,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), MovieListAdapter.MovieOnC
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
-        popularAdapter = MovieListAdapter(requireContext(),this, MovieListAdapter.POPULAR)
+        popularAdapter = MovieListAdapter(requireContext(), this, MovieListAdapter.POPULAR)
         topRatedAdapter = MovieListAdapter(requireContext(), this, MovieListAdapter.TOP_RATED)
         upComingAdapter = MovieListAdapter(requireContext(), this, MovieListAdapter.UPCOMING)
         nowPlayingAdapter = MovieListAdapter(requireContext(), this, MovieListAdapter.NOW_PLAYING)
@@ -79,10 +77,17 @@ class HomeFragment : Fragment(R.layout.fragment_home), MovieListAdapter.MovieOnC
         }
         setRecyclerView()
         setOnClickListener()
+        view.iv_profile.setOnClickListener{
+            Intent(activity,ProfileActivity :: class.java).apply { startActivity(this) }
+        }
+
         return view
     }
 
     private fun setOnClickListener() {
+
+
+
         val intent = Intent(activity, AllMoviesActivity::class.java)
         nowPlayingLayout.tv_view_all.setOnClickListener {
             intent.apply {

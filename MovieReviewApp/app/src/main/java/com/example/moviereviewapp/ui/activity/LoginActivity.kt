@@ -69,9 +69,15 @@ class LoginActivity : AppCompatActivity() {
                 is Resource.Success -> {
                     Toast.makeText(this, "Login Successfully", Toast.LENGTH_LONG).show()
                     viewModel.sessionId.value?.data?.let { it1 ->
-                        sessionManager.saveAuthToken(it1.session_id)
-                        sessionManager.saveAccId(viewModel.account.value?.data?.id ?: 0)
-                        sessionManager.saveUserName(viewModel.account.value?.data?.username ?: "")
+                        val account = viewModel.account.value?.data
+
+                        sessionManager.apply {
+                            saveAuthToken(it1.session_id)
+                            saveAccId(account?.id ?: 0)
+                            saveUserName(account?.username ?: "")
+                            saveIncludeAdult(account?.include_adult ?: false)
+                        }
+
                         Log.d("ID", "${sessionManager.fetchAccId()}")
                     }
                     finish()

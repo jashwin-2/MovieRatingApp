@@ -3,6 +3,7 @@ package com.example.moviereviewapp.utils
 import android.content.Context
 import android.content.SharedPreferences
 import com.example.moviereviewapp.R
+import com.example.moviereviewapp.utils.Constants.ADULT
 import com.example.moviereviewapp.utils.Constants.USER_ID
 import com.example.moviereviewapp.utils.Constants.USER_NAME
 import com.example.moviereviewapp.utils.Constants.USER_TOKEN
@@ -11,7 +12,7 @@ class SessionManager (context: Context) {
     private var prefs: SharedPreferences = context.getSharedPreferences(context.getString(R.string.app_name), Context.MODE_PRIVATE)
 
 
-    fun saveAuthToken(token: String) {
+    fun saveAuthToken(token: String?) {
         val editor = prefs.edit()
         editor.putString(USER_TOKEN, token)
         editor.apply()
@@ -43,5 +44,16 @@ class SessionManager (context: Context) {
 
     fun fetchUserName(): String? {
         return prefs.getString(USER_NAME,null)
+    }
+
+    fun saveIncludeAdult(boolean: Boolean) {
+        val editor = prefs.edit()
+        editor.putBoolean(ADULT, boolean)
+        editor.apply()
+    }
+
+
+    fun fetchIncludeAdult(): Boolean {
+        return prefs.getBoolean(ADULT,false)
     }
 }

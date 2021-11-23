@@ -3,13 +3,14 @@ package com.example.moviereviewapp.ui.activity
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.DialogFragmentNavigatorDestinationBuilder
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.moviereviewapp.R
 import com.example.moviereviewapp.extensions.loadImage
@@ -20,6 +21,7 @@ import com.example.moviereviewapp.ui.adapter.MovieListAdapter
 import com.example.moviereviewapp.ui.adapter.ProductionCompanyAdapter
 import com.example.moviereviewapp.ui.fragments.HomeFragment.Companion.MOVIE_ID
 import com.example.moviereviewapp.ui.fragments.RatingFragment
+import com.example.moviereviewapp.ui.fragments.RatingListener
 import com.example.moviereviewapp.ui.fragments.SearchFragment
 import com.example.moviereviewapp.ui.viewModel.MovieViewModel
 import com.example.moviereviewapp.utils.Constants
@@ -37,10 +39,17 @@ import kotlinx.android.synthetic.main.similar_movies_layout.*
 import kotlinx.android.synthetic.main.toolbar.view.*
 
 
-class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickListener {
+class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickListener,RatingListener {
     lateinit var movieViewModel: MovieViewModel
     lateinit var movie: MovieFullDetail
     lateinit var toolbar: Toolbar
+    var sessionId: String? = null
+    var accountId = 0
+
+    companion object {
+        const val FAVORITE = 1
+        const val WATCHLIST = 2
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,7 +60,10 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
 
         setObserver()
         val id = intent.getIntExtra(MOVIE_ID, 0)
-        val sessionId = SessionManager(this).fetchAuthToken()
+        SessionManager(this).apply {
+            sessionId = fetchAuthToken()
+            accountId = fetchAccId()
+        }
         movieViewModel.getMovieDetail(id, sessionId!!)
 
 
@@ -95,9 +107,11 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
         setCastRv()
         setSimilarMoviesRv()
         setProductionCompanyRv()
-        setFavWatchIvs()
+        setFavoriteButton()
+        setWatchListButton()
+        setRatingListener()
+        val fragment = RatingFragment(this)
 
-        val fragment = RatingFragment()
         iv_rate_the_movie.setOnClickListener {
             fragment.show(supportFragmentManager, "Rating")
         }
@@ -108,26 +122,95 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
 
     }
 
-    private fun setFavWatchIvs() {
+    private fun setRatingListener() {
+        movieViewModel.rateMovieResponse.observe(this){
+            if (it.isSuccessful)
+                Toast.makeText(this, "Movie Rated Successfully", Toast.LENGTH_LONG).show()
+            else
+                Toast.makeText(this, it.errorBody().toString(), Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun setFavoriteButton() {
         if (movie.account_states.favorite)
-            iv_favorite.setBackgroundResource(R.drawable.ic_favorite_filled)
+            btn_favorite.setBackgroundResource(R.drawable.ic_favorite_filled)
+
+        btn_favorite.setOnClickListener {
+            movieViewModel.addOrRemoveMovieToList(
+                FAVORITE,
+                movie.id,
+                !movie.account_states.favorite,
+                sessionId,
+                accountId
+            )
+        }
+        setFavoriteObserver()
+    }
+
+    private fun setWatchListButton() {
+
         if (movie.account_states.watchlist)
-            iv_watch_list.setBackgroundResource(R.drawable.ic_watchlist_new_fi)
-
-
-        iv_favorite.setOnClickListener {
-            iv_favorite.setBackgroundResource(R.drawable.ic_favorite_filled)
-            Toast.makeText(this, "Added to Favorite", Toast.LENGTH_LONG).show()
+            btn_watch_list.setBackgroundResource(R.drawable.ic_watchlist_filled)
+        btn_watch_list.setOnClickListener {
+            movieViewModel.addOrRemoveMovieToList(
+                WATCHLIST,
+                movie.id,
+                !movie.account_states.watchlist,
+                sessionId,
+                accountId
+            )
         }
 
-        iv_watch_list.setOnClickListener {
-            iv_watch_list.setBackgroundResource(R.drawable.ic_watchlist_new_fi)
-            Toast.makeText(
-                this, "Added to Watchlist", Toast.LENGTH_LONG
-            ).show()
-        }
+        setWatchListObserver()
 
     }
+
+    private fun setWatchListObserver() {
+        movieViewModel.addOrRemoveWatchListResponse.observe(this) {
+            if (it.isSuccessful) {
+                val currentStatus = movie.account_states.watchlist
+                if (!currentStatus) {
+                    movie.account_states.watchlist = !currentStatus
+                    btn_watch_list.setBackgroundResource(R.drawable.ic_watchlist_filled)
+                    Toast.makeText(this, "Added to WatchList", Toast.LENGTH_SHORT).show()
+                } else {
+                    btn_watch_list.setBackgroundResource(R.drawable.ic_watchlist_grey)
+                    movie.account_states.watchlist = !currentStatus
+                    Toast.makeText(this, "Removed from Watchlist", Toast.LENGTH_SHORT).show()
+                }
+            } else
+                Toast.makeText(
+                    this,
+                    it.errorBody()?.charStream().toString(),
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+        }
+    }
+
+    private fun setFavoriteObserver() {
+        movieViewModel.addOrRemoveFavoriteResponse.observe(this) {
+            if (it.isSuccessful) {
+                val currentStatus = movie.account_states.favorite
+                if (!currentStatus) {
+                    movie.account_states.favorite = !currentStatus
+                    btn_favorite.setBackgroundResource(R.drawable.ic_favorite_filled)
+                    Toast.makeText(this, "Added to Favorites", Toast.LENGTH_SHORT).show()
+                } else {
+                    btn_favorite.setBackgroundResource(R.drawable.ic_favorite_grey)
+                    movie.account_states.favorite = !currentStatus
+                    Toast.makeText(this, "Removed from Favorites", Toast.LENGTH_SHORT).show()
+                }
+            } else
+                Toast.makeText(
+                    this,
+                    it.errorBody()?.charStream().toString(),
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+        }
+    }
+
 
     private fun setProductionCompanyRv() {
         LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false).apply {
@@ -238,5 +321,10 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
         startActivity(Intent(this, MovieDetailActivity::class.java).apply {
             putExtra(MOVIE_ID, movie.id)
         })
+    }
+
+    override fun onRateBtnClicked(rating: Double) {
+        movieViewModel.rateTheMovie(movie.id, sessionId!!,rating)
+
     }
 }

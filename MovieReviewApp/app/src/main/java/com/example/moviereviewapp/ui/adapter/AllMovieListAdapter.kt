@@ -2,6 +2,7 @@ package com.example.moviereviewapp.ui.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +16,7 @@ import com.example.moviereviewapp.ui.view.AppTextView
 import com.example.moviereviewapp.ui.view.AppTextViewBold
 import com.example.moviereviewapp.utils.Constants
 import com.example.moviereviewapp.utils.MyDiffUtil
+import kotlin.math.log
 
 class AllMovieListAdapter(
     val context: Context,
@@ -55,10 +57,11 @@ class AllMovieListAdapter(
         if (!movie.release_date.isNullOrBlank())
             holder.year.text = movie.release_date.slice(0..3)
         else
-            holder.year.text ="Yet to release"
+            holder.year.text = "Yet to release"
     }
 
     override fun getItemCount() = oldMovies.size
+
     fun setMoviesList(newList: List<Movie>) {
         val myDiff = MyDiffUtil(oldMovies, newList)
         val diffResult = DiffUtil.calculateDiff(myDiff)

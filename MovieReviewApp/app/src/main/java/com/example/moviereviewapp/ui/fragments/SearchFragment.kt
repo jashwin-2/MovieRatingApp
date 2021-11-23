@@ -1,5 +1,6 @@
 package com.example.moviereviewapp.ui.fragments
 
+
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
@@ -22,10 +23,8 @@ import com.example.moviereviewapp.model.Movie
 import com.example.moviereviewapp.ui.activity.AllMoviesActivity
 import com.example.moviereviewapp.ui.activity.AllMoviesActivity.Companion.SEARCHING
 import com.example.moviereviewapp.ui.activity.MovieDetailActivity
-import com.example.moviereviewapp.ui.adapter.AllMovieListAdapter
-import com.example.moviereviewapp.ui.adapter.GenreAdapter
-import com.example.moviereviewapp.ui.adapter.GereOnClickListener
-import com.example.moviereviewapp.ui.adapter.MovieListAdapter
+import com.example.moviereviewapp.ui.activity.ProfileActivity
+import com.example.moviereviewapp.ui.adapter.*
 import com.example.moviereviewapp.ui.viewModel.MovieViewModel
 import com.example.moviereviewapp.utils.MyScrollListener
 import com.example.moviereviewapp.utils.Resource
@@ -34,8 +33,9 @@ import kotlinx.android.synthetic.main.fragment_search_result.view.*
 import kotlinx.android.synthetic.main.search_toolbar.view.*
 
 class SearchFragment : Fragment(R.layout.fragment_search), SearchView.OnQueryTextListener,
-    MovieListAdapter.MovieOnClickListener,GereOnClickListener {
+    MovieListAdapter.MovieOnClickListener, GereOnClickListener, GenreAllClickListener {
     lateinit var movieViewModel: MovieViewModel
+    lateinit var allGenreFragment: SelectGenreFragment
     lateinit var searchLayout: View
     lateinit var myScrollListener: MyScrollListener
     lateinit var adapter: AllMovieListAdapter
@@ -44,10 +44,11 @@ class SearchFragment : Fragment(R.layout.fragment_search), SearchView.OnQueryTex
     lateinit var searchHome: LinearLayout
     lateinit var searchResult: ConstraintLayout
 
-companion object{
+    companion object {
 
-    const val GENRE_ID = "genre_id"
-}
+        const val GENRE_ID = "genre_id"
+    }
+
     @SuppressLint("ResourceType")
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -65,6 +66,11 @@ companion object{
         searchResult = view.findViewById(R.id.layout_search_result)
 
         paginationProgressBar = searchResult.progress_circular_search
+
+        searchLayout.iv_profile_search.setOnClickListener {
+            Intent(activity, ProfileActivity::class.java).apply { startActivity(this) }
+        }
+
 
         setRecyclerView(view)
         return view
@@ -102,12 +108,17 @@ companion object{
                 }
             }
         }
+
+        movieViewModel.allGenres.observe(viewLifecycleOwner) {
+            if (it.isNotEmpty())
+                allGenreFragment = SelectGenreFragment(movieViewModel.allGenres.value!!, this)
+        }
     }
 
     private fun setRecyclerView(view: View) {
         //Home
-        searchHome.rv_genre.adapter = GenreAdapter(getGenres(),this)
-        GridLayoutManager(activity,3).apply {
+        searchHome.rv_genre.adapter = GenreAdapter(getGenres(), this)
+        GridLayoutManager(activity, 3).apply {
             searchHome.rv_genre.layoutManager = this
         }
         //Search Result
@@ -115,7 +126,9 @@ companion object{
         view.rv_result.adapter = adapter
         view.rv_result.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+
     }
+
 
     private fun getGenres() = listOf(
         GenreHolder("Action", R.drawable.ic_genre_action, 28),
@@ -144,8 +157,7 @@ companion object{
     }
 
     override fun onQueryTextChange(string: String?): Boolean {
-        if (string?.isBlank() == true)
-        {
+        if (string?.isBlank() == true) {
             searchHome.visibility = View.VISIBLE
             searchResult.visibility = View.GONE
         }
@@ -168,10 +180,23 @@ companion object{
         })
     }
 
-    override fun onClick(genre : GenreHolder) {
+    override fun onClick(genre: GenreHolder) {
+        if (genre.id == 0)
+            allGenreFragment.show(childFragmentManager, "All Genres")
+        else
+            startActivity(Intent(activity, AllMoviesActivity::class.java).apply {
+                putExtra(GENRE_ID, genre.id)
+                putExtra(AllMoviesActivity.SELECTED_TYPE, AllMoviesActivity.GENRE_MOVIES)
+                putExtra(AllMoviesActivity.SELECTED_TITLE, genre.title)
+            })
+    }
+
+    override fun onClick(id: Int, name: String) {
+        allGenreFragment.dismiss()
         startActivity(Intent(activity, AllMoviesActivity::class.java).apply {
-            putExtra(GENRE_ID, genre.id)
+            putExtra(GENRE_ID, id)
             putExtra(AllMoviesActivity.SELECTED_TYPE, AllMoviesActivity.GENRE_MOVIES)
-            putExtra(AllMoviesActivity.SELECTED_TITLE,genre.title)        })
+            putExtra(AllMoviesActivity.SELECTED_TITLE, name)
+        })
     }
 }

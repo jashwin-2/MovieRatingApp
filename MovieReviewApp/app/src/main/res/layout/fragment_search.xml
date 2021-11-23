@@ -10,7 +10,7 @@
 
 
     <include
-        android:id="@+id/include"
+        android:id="@+id/search_bar"
         layout="@layout/search_toolbar" />
 
     <FrameLayout

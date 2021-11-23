@@ -23,6 +23,21 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btn_watch_list"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="32dp"
+                android:layout_marginEnd="24dp"
+                android:background="@drawable/ic_watchlist_grey"
+                android:foreground="?attr/selectableItemBackground"
+                app:layout_constraintEnd_toStartOf="@+id/btn_favorite"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toEndOf="@+id/iv_poster"
+                app:layout_constraintTop_toBottomOf="@+id/tv_duration"
+                tools:ignore="UnusedAttribute" />
+
             <TextView
                 android:id="@+id/tv_rate_the_movie"
                 android:layout_width="wrap_content"
@@ -99,7 +114,7 @@
                 android:id="@+id/tv_duration"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
+                android:layout_marginStart="40dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="55dp"
                 android:gravity="center"
@@ -147,13 +162,13 @@
                 android:id="@+id/cg_geners"
                 android:layout_width="250dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="120dp"
+                android:layout_marginStart="25dp"
                 android:layout_marginTop="260dp"
+                android:layout_marginEnd="16dp"
                 app:chipSpacingHorizontal="30dp"
                 app:layout_constraintBottom_toTopOf="@+id/tv_duration"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.78"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/iv_poster"
                 app:layout_constraintTop_toTopOf="parent"
                 app:singleSelection="true" />
 
@@ -205,48 +220,32 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/layout_similar_movies" />
 
-            <ImageView
-                android:id="@+id/iv_watch_list"
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/btn_favorite"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginEnd="204dp"
-                android:foreground="?attr/selectableItemBackground"
-                android:src="@drawable/ic_watchlist_new"
+                android:layout_marginTop="60dp"
+                android:layout_marginEnd="100dp"
+                android:background="@drawable/ic_favorite_grey"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tv_duration"
-                app:tint="@color/secondary_text"
-                tools:ignore="UnusedAttribute" />
-
-            <ImageView
-
-                android:id="@+id/iv_favorite"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="60dp"
-                android:layout_marginTop="15dp"
-                android:layout_marginEnd="80dp"
-                android:foreground="?attr/selectableItemBackground"
-                android:src="@drawable/ic_favorite"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toEndOf="@+id/iv_watch_list"
-                app:layout_constraintTop_toBottomOf="@+id/tv_duration"
-                app:tint="@color/secondary_text"
-                tools:ignore="UnusedAttribute"
-                tools:targetApi="m" />
+                app:layout_constraintHorizontal_bias="0.954"
+                app:layout_constraintStart_toEndOf="@+id/iv_poster"
+                app:layout_constraintTop_toBottomOf="@+id/cg_geners" />
 
             <com.example.moviereviewapp.ui.view.AppTextView
                 android:id="@+id/tv_year"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="120dp"
                 android:layout_marginBottom="45dp"
                 android:textColor="@color/secondary_text"
-                app:layout_constraintBottom_toBottomOf="@+id/iv_favorite"
+                app:layout_constraintBottom_toBottomOf="@+id/btn_favorite"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/tv_duration" />
+                app:layout_constraintStart_toEndOf="@+id/tv_duration"
+                app:layout_constraintTop_toBottomOf="@+id/cg_geners"
+                app:layout_constraintVertical_bias="0.0" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>

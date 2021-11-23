@@ -14,6 +14,7 @@ object Constants {
     const val NOW_PLAYING_MOVIES = "now_playing"
     const val QUERY_PAGE_SIZE = 20
     const val USER_NAME  = "user_name"
+    const val ADULT  = "adult"
     const val USER_ID  = "user_id"
 
 }

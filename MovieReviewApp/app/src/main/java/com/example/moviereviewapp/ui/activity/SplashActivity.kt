@@ -6,7 +6,6 @@ import android.os.Handler
 import androidx.appcompat.app.AppCompatActivity
 import com.example.moviereviewapp.R
 import com.example.moviereviewapp.extensions.hideActionBar
-import com.example.moviereviewapp.utils.Constants
 import com.example.moviereviewapp.utils.SessionManager
 
 class SplashActivity : AppCompatActivity() {

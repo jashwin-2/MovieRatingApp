@@ -3,14 +3,12 @@ package com.example.moviereviewapp.ui.activity
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.appcompat.widget.Toolbar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.DialogFragmentNavigatorDestinationBuilder
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.moviereviewapp.R
 import com.example.moviereviewapp.extensions.loadImage
@@ -23,6 +21,7 @@ import com.example.moviereviewapp.ui.fragments.HomeFragment.Companion.MOVIE_ID
 import com.example.moviereviewapp.ui.fragments.RatingFragment
 import com.example.moviereviewapp.ui.fragments.RatingListener
 import com.example.moviereviewapp.ui.fragments.SearchFragment
+import com.example.moviereviewapp.ui.fragments.SearchHomeFragment.Companion.GENRE_ID
 import com.example.moviereviewapp.ui.viewModel.MovieViewModel
 import com.example.moviereviewapp.utils.Constants
 import com.example.moviereviewapp.utils.Resource
@@ -39,7 +38,8 @@ import kotlinx.android.synthetic.main.similar_movies_layout.*
 import kotlinx.android.synthetic.main.toolbar.view.*
 
 
-class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickListener,RatingListener {
+class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickListener,
+    RatingListener {
     lateinit var movieViewModel: MovieViewModel
     lateinit var movie: MovieFullDetail
     lateinit var toolbar: Toolbar
@@ -55,7 +55,13 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_movie_detail)
 
-        movieViewModel = ViewModelProvider(this).get(MovieViewModel::class.java)
+       // movieViewModel = ViewModelProvider(this).get(MovieViewModel::class.java)
+        ViewModelProvider(
+            this,
+            ViewModelProvider.AndroidViewModelFactory.getInstance(application)
+        )[MovieViewModel::class.java].also {
+            movieViewModel = it
+        }
         toolbar = movie_detail_toolbar.toolbar_custom
 
         setObserver()
@@ -123,7 +129,7 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
     }
 
     private fun setRatingListener() {
-        movieViewModel.rateMovieResponse.observe(this){
+        movieViewModel.rateMovieResponse.observe(this) {
             if (it.isSuccessful)
                 Toast.makeText(this, "Movie Rated Successfully", Toast.LENGTH_LONG).show()
             else
@@ -271,7 +277,7 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
             cg_geners.setOnCheckedChangeListener { group: ChipGroup, id: Int ->
                 val chip = group.findViewById<Chip>(id)
                 startActivity(Intent(this, AllMoviesActivity::class.java).apply {
-                    putExtra(SearchFragment.GENRE_ID, id)
+                    putExtra(GENRE_ID, id)
                     putExtra(AllMoviesActivity.SELECTED_TYPE, AllMoviesActivity.GENRE_MOVIES)
                     putExtra(AllMoviesActivity.SELECTED_TITLE, chip.text)
                 })
@@ -324,7 +330,7 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
     }
 
     override fun onRateBtnClicked(rating: Double) {
-        movieViewModel.rateTheMovie(movie.id, sessionId!!,rating)
+        movieViewModel.rateTheMovie(movie.id, sessionId!!, rating)
 
     }
 }

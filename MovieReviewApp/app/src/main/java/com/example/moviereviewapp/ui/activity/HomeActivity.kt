@@ -82,11 +82,20 @@ class HomeActivity : AppCompatActivity() {
     override fun onBackPressed() {
         if (currentFragment == HOME_FRAGMENT)
             super.onBackPressed()
-        else {
-            fragmentManager.switch(R.id.fragment_container, homeFragment, HOME_FRAGMENT)
-            currentFragment = HOME_FRAGMENT
-            bottomNavigationView.selectedItemId = R.id.home
+        else if (currentFragment == SEARCH_FRAGMENT) {
+            val searFragment = fragmentManager.findFragmentByTag(SEARCH_FRAGMENT)
+
+            if (searFragment != null && searFragment.childFragmentManager.backStackEntryCount > 1) {
+                searFragment.childFragmentManager.popBackStack()
+                return
+            }
         }
+        goToHomeFragment()
     }
 
+    private fun goToHomeFragment() {
+        fragmentManager.switch(R.id.fragment_container, homeFragment, HOME_FRAGMENT)
+        currentFragment = HOME_FRAGMENT
+        bottomNavigationView.selectedItemId = R.id.home
+    }
 }

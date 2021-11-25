@@ -30,7 +30,7 @@ class CastAdapter(val context: Context, private val castList: List<Cast>) :
 
     override fun onBindViewHolder(holder: CastHolder, position: Int) {
         val url = Constants.IMAGE_BASE_URL + castList[position].profile_path
-        (context as AppCompatActivity).loadImage(url, holder.photo,R.drawable.ic_default_profile)
+        (context as AppCompatActivity).loadImage(url, holder.photo, R.drawable.ic_default_profile)
         holder.realName.text = castList[position].name
         holder.inMovieName.text = castList[position].character
     }

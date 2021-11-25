@@ -13,12 +13,12 @@ import com.example.moviereviewapp.model.ProductionCompany
 import com.example.moviereviewapp.ui.view.AppTextView
 import com.example.moviereviewapp.utils.Constants
 
-class ProductionCompanyAdapter(val context: Context, val companyList: List<ProductionCompany>) :
+class ProductionCompanyAdapter(val context: Context, private val companyList: List<ProductionCompany>) :
     RecyclerView.Adapter<ProductionCompanyAdapter.CompanyHolder>() {
 
     inner class CompanyHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val poster = view.findViewById<ImageView>(R.id.iv_company_poster)
-        val comapanyName = view.findViewById<AppTextView>(R.id.tv_company_name)
+        val poster: ImageView = view.findViewById<ImageView>(R.id.iv_company_poster)
+        val companyName: AppTextView = view.findViewById<AppTextView>(R.id.tv_company_name)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CompanyHolder {
@@ -30,7 +30,7 @@ class ProductionCompanyAdapter(val context: Context, val companyList: List<Produ
     override fun onBindViewHolder(holder: CompanyHolder, position: Int) {
         val url = Constants.IMAGE_BASE_URL + companyList[position].logo_path
         (context as AppCompatActivity).loadImage(url, holder.poster, R.drawable.ic_default_profile)
-        holder.comapanyName.text = companyList[position].name
+        holder.companyName.text = companyList[position].name
     }
 
     override fun getItemCount(): Int {

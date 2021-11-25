@@ -1,16 +1,32 @@
 package com.example.moviereviewapp.repository
 
+import android.app.Application
+import android.util.Log
 import com.example.moviereviewapp.api.ServiceProvider
 import com.example.moviereviewapp.api.service.MovieService
-import com.example.moviereviewapp.model.FavoriteBody
-import com.example.moviereviewapp.model.Rating
-import com.example.moviereviewapp.model.WatchListBody
+import com.example.moviereviewapp.db.MoviesAppDataBase
+import com.example.moviereviewapp.db.MoviesDao
+import com.example.moviereviewapp.db.relation.MovieListMovieCrossRef
+import com.example.moviereviewapp.model.*
 import com.example.moviereviewapp.utils.Constants
+import com.example.moviereviewapp.utils.Constants.POPULAR_MOVIES
+import com.example.moviereviewapp.utils.Constants.TOP_RATED_MOVIES
+import com.example.moviereviewapp.utils.Resource
 
-class MovieRepository : Repository() {
+class MovieRepository(application: Application) : Repository() {
     val movieService: MovieService = ServiceProvider.movieService
-    suspend fun getMoviesList(type: String, page: Int = 1) =
-        safeApiCall { movieService.getMoviesList(type, Constants.KEY, page) }
+    val moviesDao: MoviesDao = MoviesAppDataBase.getInstance(application).movieDao
+
+    init {
+
+    }
+
+    suspend fun getMoviesList(type: String, page: Int = 1): Resource<MovieListResponse> {
+        val response = safeApiCall { movieService.getMoviesList(type, Constants.KEY, page) }
+        if (response is Resource.Success)
+            loadMoviesToDb(response.data?.results ?: listOf(), type)
+        return response
+    }
 
     suspend fun getMovieDetails(id: Int, sessionId: String) =
         safeApiCall { movieService.getMovieDetail(id, Constants.KEY, sessionId) }
@@ -55,10 +71,19 @@ class MovieRepository : Repository() {
         movieId: Int,
         sessionId: String,
         rating: Rating
-    ) = movieService.rateTheMovie(movieId, Constants.KEY, sessionId,rating)
+    ) = movieService.rateTheMovie(movieId, Constants.KEY, sessionId, rating)
 
     suspend fun getAllGenres() =
         safeApiCall {
             movieService.getAllGenres(Constants.KEY)
         }
+
+
+    private suspend fun loadMoviesToDb(data: List<Movie>, type: String) {
+        moviesDao.insertMovies(data)
+        val list = mutableListOf<MovieListMovieCrossRef>()
+        data.forEach { list.add(MovieListMovieCrossRef(type, it.id)) }
+        moviesDao.inertMoviesListMoviesCrossRefs(list)
+    }
+
 }

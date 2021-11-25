@@ -12,6 +12,8 @@ object Constants {
     const val UPCOMING_MOVIES = "upcoming"
     const val TOP_RATED_MOVIES = "top_rated"
     const val NOW_PLAYING_MOVIES = "now_playing"
+    const val WATCHLIST_MOVIES = "watchlist_movies"
+    const val FAVORITE_MOVIES = "favorite_movies"
     const val QUERY_PAGE_SIZE = 20
     const val USER_NAME  = "user_name"
     const val ADULT  = "adult"

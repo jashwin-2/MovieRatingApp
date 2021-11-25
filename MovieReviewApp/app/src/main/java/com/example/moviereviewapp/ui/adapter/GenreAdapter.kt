@@ -10,7 +10,7 @@ import com.example.moviereviewapp.R
 import com.example.moviereviewapp.model.GenreHolder
 import com.example.moviereviewapp.ui.view.AppTextView
 
-class GenreAdapter(val genreList: List<GenreHolder>, val clickListener: GereOnClickListener) :
+class GenreAdapter(private val genreList: List<GenreHolder>, private val clickListener: GereOnClickListener) :
     RecyclerView.Adapter<GenreAdapter.ViewHolder>() {
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {

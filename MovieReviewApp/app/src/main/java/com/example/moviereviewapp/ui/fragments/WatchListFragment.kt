@@ -39,8 +39,13 @@ class WatchListFragment : Fragment(R.layout.fragment_favorite),
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_watchlist, container, false)
-        movieViewModel = ViewModelProvider(this).get(MovieViewModel::class.java)
-
+       // movieViewModel = ViewModelProvider(this).get(MovieViewModel::class.java)
+        ViewModelProvider(
+            this,
+            ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().application)
+        )[MovieViewModel::class.java].also {
+            movieViewModel = it
+        }
         SessionManager(activity as Context).apply {
             accountId = fetchAccId()
             sessionId = fetchAuthToken()!!

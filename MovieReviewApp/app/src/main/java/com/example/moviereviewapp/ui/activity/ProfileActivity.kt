@@ -1,9 +1,9 @@
 package com.example.moviereviewapp.ui.activity
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import com.example.moviereviewapp.R
 import com.example.moviereviewapp.utils.SessionManager

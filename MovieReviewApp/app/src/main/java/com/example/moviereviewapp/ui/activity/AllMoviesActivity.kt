@@ -1,4 +1,4 @@
-package com.example.moviereviewapp .ui.activity
+package com.example.moviereviewapp.ui.activity
 
 import android.content.Intent
 import android.os.Bundle
@@ -19,8 +19,7 @@ import com.example.moviereviewapp.ui.activity.MovieDetailActivity
 import com.example.moviereviewapp.ui.adapter.AllMovieListAdapter
 import com.example.moviereviewapp.ui.adapter.MovieListAdapter
 import com.example.moviereviewapp.ui.fragments.HomeFragment
-import com.example.moviereviewapp.ui.fragments.SearchFragment.Companion.GENRE_ID
-import com.example.moviereviewapp.ui.fragments.SelectGenreFragment
+import com.example.moviereviewapp.ui.fragments.SearchHomeFragment.Companion.GENRE_ID
 import com.example.moviereviewapp.ui.viewModel.MovieViewModel
 import com.example.moviereviewapp.utils.MyScrollListener
 import com.example.moviereviewapp.utils.Resource
@@ -30,7 +29,6 @@ import kotlinx.android.synthetic.main.toolbar.view.*
 class AllMoviesActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickListener {
     lateinit var movieViewModel: MovieViewModel
     lateinit var adapter: AllMovieListAdapter
-    lateinit var allGenreFragment: SelectGenreFragment
     var type: Int = 0
     var genreId = 0
     lateinit var recyclerView: RecyclerView
@@ -52,7 +50,11 @@ class AllMoviesActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickList
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_all_movies)
 
-        ViewModelProvider(this).get(MovieViewModel::class.java).also {
+
+        ViewModelProvider(
+            this,
+            ViewModelProvider.AndroidViewModelFactory.getInstance(application)
+        )[MovieViewModel::class.java].also {
             movieViewModel = it
         }
 

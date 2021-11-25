@@ -68,7 +68,13 @@ class HomeFragment : Fragment(R.layout.fragment_home), MovieListAdapter.MovieOnC
         nowPlayingLayout = view.layout_now_playing
         upComingLayout = view.layout_upcoming
 
-        ViewModelProvider(requireActivity()).get(MovieViewModel::class.java).also {
+//        ViewModelProvider(requireActivity()).get(MovieViewModel::class.java).also {
+//            movieViewModel = it
+//        }
+        ViewModelProvider(
+            this,
+            ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().application)
+        )[MovieViewModel::class.java].also {
             movieViewModel = it
         }
 

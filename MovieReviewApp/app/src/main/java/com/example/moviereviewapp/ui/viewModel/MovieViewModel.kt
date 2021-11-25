@@ -1,8 +1,9 @@
 package com.example.moviereviewapp.ui.viewModel
 
+import android.app.Application
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.moviereviewapp.model.*
 import com.example.moviereviewapp.repository.MovieRepository
@@ -15,8 +16,8 @@ import com.example.moviereviewapp.utils.Resource
 import kotlinx.coroutines.launch
 import retrofit2.Response
 
-class MovieViewModel : ViewModel() {
-    private val movieRepository: MovieRepository = MovieRepository()
+class MovieViewModel(application: Application) : AndroidViewModel(application) {
+    private val movieRepository: MovieRepository = MovieRepository(application)
     val rateMovieResponse = MutableLiveData<Response<Unit>>()
     val addOrRemoveFavoriteResponse = MutableLiveData<Response<Unit>>()
     val addOrRemoveWatchListResponse = MutableLiveData<Response<Unit>>()

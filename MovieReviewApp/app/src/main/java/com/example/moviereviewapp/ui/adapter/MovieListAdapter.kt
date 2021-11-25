@@ -12,10 +12,14 @@ import com.example.moviereviewapp.model.Movie
 import com.example.moviereviewapp.ui.view.AppTextView
 import com.example.moviereviewapp.utils.Constants
 
-class MovieListAdapter(val context : Context,private val clickListener : MovieOnClickListener, val type : Int = 0 ) : RecyclerView.Adapter<MovieListAdapter.MovieHolder>() {
-     var oldMovieList: List<Movie> = listOf()
+class MovieListAdapter(
+    val context: Context,
+    private val clickListener: MovieOnClickListener,
+    val type: Int = 0
+) : RecyclerView.Adapter<MovieListAdapter.MovieHolder>() {
+    var oldMovieList: List<Movie> = listOf()
 
-    companion object{
+    companion object {
         const val POPULAR = 1
         const val TOP_RATED = 2
         const val UPCOMING = 3
@@ -31,7 +35,7 @@ class MovieListAdapter(val context : Context,private val clickListener : MovieOn
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.movie_holder,parent,false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.movie_holder, parent, false)
         return MovieHolder(view)
     }
 
@@ -40,12 +44,12 @@ class MovieListAdapter(val context : Context,private val clickListener : MovieOn
         holder.title.text = movie.title
         holder.rating.text = movie.vote_average.toString()
         holder.releaserYear.text = movie.release_date.slice(0..3)
-       val url =Constants.IMAGE_BASE_URL+movie.poster_path
+        val url = Constants.IMAGE_BASE_URL + movie.poster_path
         Glide.with(context)
             .load(url)
             .placeholder(R.drawable.ic_default_movie)
             .into(holder.poster)
-        holder.layout.setOnClickListener{
+        holder.layout.setOnClickListener {
             clickListener.onClick(oldMovieList[position])
         }
 
@@ -55,12 +59,12 @@ class MovieListAdapter(val context : Context,private val clickListener : MovieOn
         return oldMovieList.size
     }
 
-    fun setMoviesList(list : List<Movie>) {
+    fun setMoviesList(list: List<Movie>) {
         oldMovieList = list
         notifyDataSetChanged()
     }
 
-    interface MovieOnClickListener{
-        fun onClick(movie : Movie)
+    interface MovieOnClickListener {
+        fun onClick(movie: Movie)
     }
 }

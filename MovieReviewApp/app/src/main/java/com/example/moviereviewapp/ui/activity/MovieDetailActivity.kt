@@ -7,6 +7,8 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,26 +22,33 @@ import com.example.moviereviewapp.ui.adapter.ProductionCompanyAdapter
 import com.example.moviereviewapp.ui.fragments.HomeFragment.Companion.MOVIE_ID
 import com.example.moviereviewapp.ui.fragments.RatingFragment
 import com.example.moviereviewapp.ui.fragments.RatingListener
-import com.example.moviereviewapp.ui.fragments.SearchFragment
 import com.example.moviereviewapp.ui.fragments.SearchHomeFragment.Companion.GENRE_ID
 import com.example.moviereviewapp.ui.viewModel.MovieViewModel
-import com.example.moviereviewapp.utils.Constants
-import com.example.moviereviewapp.utils.Resource
-import com.example.moviereviewapp.utils.SessionManager
+import com.example.moviereviewapp.utils.*
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import com.google.android.material.snackbar.Snackbar
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
+import kotlinx.android.synthetic.main.activity_all_movies.*
 import kotlinx.android.synthetic.main.activity_movie_detail.*
 import kotlinx.android.synthetic.main.cast_layout.*
 import kotlinx.android.synthetic.main.production_company_layout.*
 import kotlinx.android.synthetic.main.search_toolbar.view.*
 import kotlinx.android.synthetic.main.similar_movies_layout.*
 import kotlinx.android.synthetic.main.toolbar.view.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickListener,
     RatingListener {
+
+    var comingFromNoInternet = false
+    var movieId = 0
+    lateinit var snackbar: Snackbar
+    lateinit var movieDetailLayout: NestedScrollView
     lateinit var movieViewModel: MovieViewModel
     lateinit var movie: MovieFullDetail
     lateinit var toolbar: Toolbar
@@ -55,7 +64,7 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_movie_detail)
 
-       // movieViewModel = ViewModelProvider(this).get(MovieViewModel::class.java)
+        // movieViewModel = ViewModelProvider(this).get(MovieViewModel::class.java)
         ViewModelProvider(
             this,
             ViewModelProvider.AndroidViewModelFactory.getInstance(application)
@@ -63,15 +72,20 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
             movieViewModel = it
         }
         toolbar = movie_detail_toolbar.toolbar_custom
-
+        movieDetailLayout = this.findViewById(R.id.nestedScrollView2)
+        movieDetailLayout.visibility = View.GONE
+        setToolBar("Movie Name")
         setObserver()
-        val id = intent.getIntExtra(MOVIE_ID, 0)
+
+        movieId = intent.getIntExtra(MOVIE_ID, 0)
         SessionManager(this).apply {
             sessionId = fetchAuthToken()
             accountId = fetchAccId()
         }
-        movieViewModel.getMovieDetail(id, sessionId!!)
 
+        initializeSnackBar()
+        addNetworkStateObserver()
+        movieViewModel.getMovieDetail(movieId, sessionId!!)
 
     }
 
@@ -83,17 +97,21 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
                     movie = it.data!!
                     setToolBar(movie.title)
                     setActivity()
+                    movieDetailLayout.visibility = View.VISIBLE
                 }
                 is Resource.Loading -> {
                     progress_circular_movie_detail.visibility = View.VISIBLE
                 }
                 is Resource.Error -> {
-                    progress_circular_movie_detail.visibility = View.GONE
-                    Toast.makeText(
-                        this,
-                        it.error.status_message,
-                        Toast.LENGTH_LONG
-                    ).show()
+                    if (!isNetworkAvailable(this) && !comingFromNoInternet)
+                        showNoConnectionSnackBar()
+                    else
+                        Toast.makeText(
+                            this,
+                            it.error.status_message,
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
                 }
             }
         }
@@ -142,13 +160,16 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
             btn_favorite.setBackgroundResource(R.drawable.ic_favorite_filled)
 
         btn_favorite.setOnClickListener {
-            movieViewModel.addOrRemoveMovieToList(
-                FAVORITE,
-                movie.id,
-                !movie.account_states.favorite,
-                sessionId,
-                accountId
-            )
+            if (isNetworkAvailable(this))
+                movieViewModel.addOrRemoveMovieToList(
+                    FAVORITE,
+                    movie.id,
+                    !movie.account_states.favorite,
+                    sessionId,
+                    accountId
+                )
+            else
+                Toast.makeText(this, "No Internet", Toast.LENGTH_SHORT).show()
         }
         setFavoriteObserver()
     }
@@ -158,13 +179,17 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
         if (movie.account_states.watchlist)
             btn_watch_list.setBackgroundResource(R.drawable.ic_watchlist_filled)
         btn_watch_list.setOnClickListener {
-            movieViewModel.addOrRemoveMovieToList(
-                WATCHLIST,
-                movie.id,
-                !movie.account_states.watchlist,
-                sessionId,
-                accountId
-            )
+            if (isNetworkAvailable(this))
+                movieViewModel.addOrRemoveMovieToList(
+                    WATCHLIST,
+                    movie.id,
+                    !movie.account_states.watchlist,
+                    sessionId,
+                    accountId
+                )
+            else
+                Toast.makeText(this, "No Internet", Toast.LENGTH_SHORT).show()
+
         }
 
         setWatchListObserver()
@@ -198,6 +223,7 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
         movieViewModel.addOrRemoveFavoriteResponse.observe(this) {
             if (it.isSuccessful) {
                 val currentStatus = movie.account_states.favorite
+
                 if (!currentStatus) {
                     movie.account_states.favorite = !currentStatus
                     btn_favorite.setBackgroundResource(R.drawable.ic_favorite_filled)
@@ -207,6 +233,7 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
                     movie.account_states.favorite = !currentStatus
                     Toast.makeText(this, "Removed from Favorites", Toast.LENGTH_SHORT).show()
                 }
+
             } else
                 Toast.makeText(
                     this,
@@ -330,7 +357,61 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
     }
 
     override fun onRateBtnClicked(rating: Double) {
-        movieViewModel.rateTheMovie(movie.id, sessionId!!, rating)
+        if (isNetworkAvailable(this))
+            movieViewModel.rateTheMovie(movie.id, sessionId!!, rating)
+        else
+            Toast.makeText(this, "No Internet", Toast.LENGTH_SHORT).show()
+
 
     }
+
+    private fun showNoConnectionSnackBar() {
+        snackbar.show()
+        comingFromNoInternet = true
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        snackbar.dismiss()
+    }
+
+    private fun addNetworkStateObserver() {
+
+        NetworkConnectionLiveData(this).observe(this) {
+            if (!it)
+                showNoConnectionSnackBar()
+            else if (it && comingFromNoInternet) {
+                Snackbar.make(
+                    this.layout_movie_detail,
+                    "Back Online",
+                    Snackbar.LENGTH_SHORT
+                ).apply {
+                    setBackgroundTint(resources.getColor(R.color.green))
+                }.show()
+                movieViewModel.getMovieDetail(movieId, sessionId!!)
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (!isNetworkAvailable(this))
+            showNoConnectionSnackBar()
+        else {
+            snackbar.dismiss()
+            comingFromNoInternet = false
+        }
+    }
+
+    private fun initializeSnackBar() {
+        snackbar = Snackbar.make(
+            this.layout_movie_detail,
+            "No Connection",
+            Snackbar.LENGTH_INDEFINITE
+        ).apply {
+            setBackgroundTint(resources.getColor(R.color.snack_bar_bg))
+        }
+    }
+
 }

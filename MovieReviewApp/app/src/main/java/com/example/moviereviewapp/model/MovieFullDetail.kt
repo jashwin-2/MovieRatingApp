@@ -1,5 +1,7 @@
 package com.example.moviereviewapp.model
 
+import com.example.moviereviewapp.db.model.Genre
+
 data class MovieFullDetail(
     val account_states: AccountStates,
     val credits: Credits,

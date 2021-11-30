@@ -1,8 +1,10 @@
 package com.example.moviereviewapp.ui.fragments
 
+import android.app.ActivityOptions
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +20,7 @@ import com.example.moviereviewapp.ui.activity.ProfileActivity
 import com.example.moviereviewapp.ui.adapter.AllMovieListAdapter
 import com.example.moviereviewapp.ui.adapter.MovieListAdapter
 import com.example.moviereviewapp.ui.viewModel.MovieViewModel
+import com.example.moviereviewapp.utils.NetworkConnectionLiveData
 import com.example.moviereviewapp.utils.Resource
 import com.example.moviereviewapp.utils.SessionManager
 import com.facebook.shimmer.ShimmerFrameLayout
@@ -62,9 +65,16 @@ class FavoriteFragment : Fragment(R.layout.fragment_favorite),
         addObservers()
 
         view.iv_profile_favorite.setOnClickListener {
-            Intent(activity, ProfileActivity::class.java).apply { startActivity(this) }
-        }
+            Intent(activity, ProfileActivity::class.java).apply {
+                startActivity(
+                    this, ActivityOptions.makeSceneTransitionAnimation(
+                        activity, view.iv_profile_favorite,
+                        "iv_profile"
+                    ).toBundle()
+                )
+            }        }
         setUpRecyclerView()
+        addNetworkStateObserver()
         return view
     }
 
@@ -81,9 +91,10 @@ class FavoriteFragment : Fragment(R.layout.fragment_favorite),
 
     private fun addObservers() {
         movieViewModel.favoriteMovies.observe(viewLifecycleOwner) {
+            val newList = it.data?.results ?: listOf()
+
             when (it) {
                 is Resource.Success -> {
-                    val newList = it.data?.results ?: listOf()
                     shimmerFrameLayout.stopShimmer()
                     favRecyclerView.visibility = View.VISIBLE
                     shimmerFrameLayout.visibility = View.GONE
@@ -92,11 +103,19 @@ class FavoriteFragment : Fragment(R.layout.fragment_favorite),
                     favAdapter.setMoviesList(newList)
                 }
                 is Resource.Loading -> shimmerFrameLayout.startShimmer()
-                is Resource.Error -> Toast.makeText(
-                    requireContext(),
-                    it.error.status_message,
-                    Toast.LENGTH_LONG
-                ).show()
+                is Resource.Error -> {
+                    if (!newList.isNullOrEmpty())
+                    {
+                        Log.d("Network", "${newList.size} fav")
+                        shimmerFrameLayout.stopShimmer()
+                        favRecyclerView.visibility = View.VISIBLE
+                        shimmerFrameLayout.visibility = View.GONE
+                        adjustScrollPositionIfChanged(newList)
+
+                        favAdapter.setMoviesList(newList)
+
+                    }
+                }
             }
 
         }
@@ -121,5 +140,13 @@ class FavoriteFragment : Fragment(R.layout.fragment_favorite),
         startActivity(Intent(activity, MovieDetailActivity::class.java).apply {
             putExtra(HomeFragment.MOVIE_ID, movie.id)
         })
+    }
+
+    private fun addNetworkStateObserver() {
+        NetworkConnectionLiveData(activity as Context).observe(viewLifecycleOwner) {
+            if (it)
+                movieViewModel.getFavoriteMovies(accountId, sessionId)
+        }
+
     }
 }

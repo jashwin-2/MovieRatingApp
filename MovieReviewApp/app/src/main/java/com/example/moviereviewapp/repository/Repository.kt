@@ -12,6 +12,7 @@ abstract class Repository {
 
     companion object {
         const val NULL_BODY_ERROR_CODE = -1
+        const val NETWORK_ERROR_CODE = -2
     }
 
 
@@ -19,6 +20,7 @@ abstract class Repository {
         apiCall: suspend () -> Response<T>
     ): Resource<T> {
         return withContext(Dispatchers.IO) {
+
             val nullBodyError by lazy {
                 Resource.Error<T>(
                     ErrorResponse(
@@ -27,12 +29,26 @@ abstract class Repository {
                 )
             }
 
-            val response: Response<T> = apiCall.invoke()
+            val NetworkError by lazy {
+                Resource.Error<T>(
+                    ErrorResponse(
+                        NETWORK_ERROR_CODE,"Network Error",false
+                    )
+                )
+            }
+
+            val response: Response<T>
+            try {
+               response = apiCall.invoke()
+            }catch (e : Exception){
+                Log.d("Call", "safeApiCall: ")
+             return@withContext NetworkError
+            }
 
             if (response.errorBody()?.charStream()!=null) {
                 val errorB = convertErrorBody(response)
                 Log.d("Error", "Error ")
-                return@withContext Resource.Error(errorB,null)
+                return@withContext Resource.Error(errorB)
             }
 
             if (response.isSuccessful) {

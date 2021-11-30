@@ -2,6 +2,7 @@ package com.example.moviereviewapp.ui.fragments
 
 
 import android.annotation.SuppressLint
+import android.app.ActivityOptions
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -29,6 +30,7 @@ import com.example.moviereviewapp.ui.viewModel.MovieViewModel
 import com.example.moviereviewapp.ui.viewModel.SharedViewModel
 import com.example.moviereviewapp.utils.MyScrollListener
 import com.example.moviereviewapp.utils.Resource
+import kotlinx.android.synthetic.main.fragment_home.view.*
 import kotlinx.android.synthetic.main.fragment_search_home.view.*
 import kotlinx.android.synthetic.main.fragment_search_result.view.*
 import kotlinx.android.synthetic.main.search_toolbar.view.*
@@ -67,7 +69,14 @@ class SearchFragment : Fragment(R.layout.fragment_search), SearchView.OnQueryTex
         searchLayout.sv_search.setOnQueryTextListener(this)
 
         searchLayout.iv_profile_search.setOnClickListener {
-            Intent(activity, ProfileActivity::class.java).apply { startActivity(this) }
+            Intent(activity, ProfileActivity::class.java).apply {
+                startActivity(
+                    this, ActivityOptions.makeSceneTransitionAnimation(
+                        activity, view.iv_profile_search,
+                        "iv_profile"
+                    ).toBundle()
+                )
+            }
         }
 
         if (savedInstanceState == null)
@@ -117,7 +126,11 @@ class SearchFragment : Fragment(R.layout.fragment_search), SearchView.OnQueryTex
             requireView().toolbar.findViewById(androidx.appcompat.R.id.search_close_btn)
         closeButton.setOnClickListener {
             clearSearchBar()
-            childFragmentManager.popBackStack()
+
+            childFragmentManager.run {
+             if(backStackEntryCount>1)
+                 popBackStack()
+            }
         }
 
     }

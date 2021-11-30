@@ -8,7 +8,7 @@ import android.view.Window
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.moviereviewapp.R
-import com.example.moviereviewapp.model.Genre
+import com.example.moviereviewapp.db.model.Genre
 import com.example.moviereviewapp.ui.adapter.GenreAllClickListener
 import com.example.moviereviewapp.ui.adapter.GenreListAdapter
 import kotlinx.android.synthetic.main.select_genre_dialogue_fragment.view.*

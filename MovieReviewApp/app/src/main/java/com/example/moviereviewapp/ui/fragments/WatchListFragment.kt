@@ -1,5 +1,6 @@
 package com.example.moviereviewapp.ui.fragments
 
+import android.app.ActivityOptions
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -18,15 +19,28 @@ import com.example.moviereviewapp.ui.activity.ProfileActivity
 import com.example.moviereviewapp.ui.adapter.AllMovieListAdapter
 import com.example.moviereviewapp.ui.adapter.MovieListAdapter
 import com.example.moviereviewapp.ui.viewModel.MovieViewModel
+import com.example.moviereviewapp.utils.NetworkConnectionLiveData
 import com.example.moviereviewapp.utils.Resource
 import com.example.moviereviewapp.utils.SessionManager
+import com.example.moviereviewapp.utils.isNetworkAvailable
 import com.facebook.shimmer.ShimmerFrameLayout
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.activity_all_movies.*
+import kotlinx.android.synthetic.main.activity_home.*
+import kotlinx.android.synthetic.main.fragment_home.view.*
 import kotlinx.android.synthetic.main.fragment_watchlist.view.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.net.ConnectException
 
 class WatchListFragment : Fragment(R.layout.fragment_favorite),
     MovieListAdapter.MovieOnClickListener {
 
     private lateinit var shimmerFrameLayout: ShimmerFrameLayout
+
+
+    var comingFromNoInternet = false
     lateinit var watchListRv: RecyclerView
     lateinit var movieViewModel: MovieViewModel
     lateinit var watchAdapter: AllMovieListAdapter
@@ -39,7 +53,7 @@ class WatchListFragment : Fragment(R.layout.fragment_favorite),
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_watchlist, container, false)
-       // movieViewModel = ViewModelProvider(this).get(MovieViewModel::class.java)
+        // movieViewModel = ViewModelProvider(this).get(MovieViewModel::class.java)
         ViewModelProvider(
             this,
             ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().application)
@@ -59,18 +73,27 @@ class WatchListFragment : Fragment(R.layout.fragment_favorite),
         addObservers()
 
         view.iv_profile_watchlist.setOnClickListener {
-            Intent(activity, ProfileActivity::class.java).apply { startActivity(this) }
-        }
+            Intent(activity, ProfileActivity::class.java).apply {
+                startActivity(
+                    this, ActivityOptions.makeSceneTransitionAnimation(
+                        activity, view.iv_profile_watchlist,
+                        "iv_profile"
+                    ).toBundle()
+                )
+            }        }
 
         setUpRecyclerView()
+        addNetworkStateObserver()
+
         return view
     }
 
     private fun addObservers() {
         movieViewModel.watchListMovies.observe(viewLifecycleOwner) {
+            val newList = it.data?.results ?: listOf()
             when (it) {
                 is Resource.Success -> {
-                    val newList = it.data?.results ?: listOf()
+
                     shimmerFrameLayout.stopShimmer()
                     shimmerFrameLayout.visibility = View.GONE
                     watchListRv.visibility = View.VISIBLE
@@ -81,11 +104,17 @@ class WatchListFragment : Fragment(R.layout.fragment_favorite),
 
                 is Resource.Loading -> shimmerFrameLayout.startShimmer()
 
-                is Resource.Error -> Toast.makeText(
-                    requireContext(),
-                    it.error.status_message,
-                    Toast.LENGTH_LONG
-                ).show()
+                is Resource.Error -> {
+                    if (!newList.isNullOrEmpty()) {
+                        shimmerFrameLayout.stopShimmer()
+                        shimmerFrameLayout.visibility = View.GONE
+                        watchListRv.visibility = View.VISIBLE
+                        adjustScrollPositionIfChanged(newList)
+
+                        watchAdapter.setMoviesList(newList)
+                    }
+
+                }
             }
 
         }
@@ -123,5 +152,13 @@ class WatchListFragment : Fragment(R.layout.fragment_favorite),
         startActivity(Intent(activity, MovieDetailActivity::class.java).apply {
             putExtra(HomeFragment.MOVIE_ID, movie.id)
         })
+    }
+
+    private fun addNetworkStateObserver() {
+        NetworkConnectionLiveData(activity as Context).observe(viewLifecycleOwner) {
+            if (it)
+                movieViewModel.getWatchListMovies(accountId, sessionId)
+        }
+
     }
 }

@@ -1,17 +1,19 @@
 package com.example.moviereviewapp.ui.fragments
 
 import android.annotation.SuppressLint
+import android.app.ActivityOptions
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
-import com.example.moviereviewapp.R
-import com.example.moviereviewapp.ui.viewModel.MovieViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.moviereviewapp.R
 import com.example.moviereviewapp.model.Movie
 import com.example.moviereviewapp.model.MovieListResponse
 import com.example.moviereviewapp.ui.activity.AllMoviesActivity
@@ -24,15 +26,22 @@ import com.example.moviereviewapp.ui.activity.AllMoviesActivity.Companion.UPCOMI
 import com.example.moviereviewapp.ui.activity.MovieDetailActivity
 import com.example.moviereviewapp.ui.activity.ProfileActivity
 import com.example.moviereviewapp.ui.adapter.MovieListAdapter
+import com.example.moviereviewapp.ui.viewModel.MovieViewModel
+import com.example.moviereviewapp.utils.NetworkConnectionLiveData
 import com.example.moviereviewapp.utils.Resource
 import com.example.moviereviewapp.utils.SessionManager
+import com.example.moviereviewapp.utils.isNetworkAvailable
 import com.facebook.shimmer.ShimmerFrameLayout
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.fragment_home.view.*
 import kotlinx.android.synthetic.main.movie_list_layout.view.*
 
 
 class HomeFragment : Fragment(R.layout.fragment_home), MovieListAdapter.MovieOnClickListener {
     lateinit var movieViewModel: MovieViewModel
+    lateinit var layout: ConstraintLayout
+
     lateinit var popularLayout: View
     lateinit var topRatedLayout: View
     lateinit var nowPlayingLayout: View
@@ -68,6 +77,8 @@ class HomeFragment : Fragment(R.layout.fragment_home), MovieListAdapter.MovieOnC
         nowPlayingLayout = view.layout_now_playing
         upComingLayout = view.layout_upcoming
 
+        layout = view.home_layout
+
 //        ViewModelProvider(requireActivity()).get(MovieViewModel::class.java).also {
 //            movieViewModel = it
 //        }
@@ -83,15 +94,25 @@ class HomeFragment : Fragment(R.layout.fragment_home), MovieListAdapter.MovieOnC
         }
         setRecyclerView()
         setOnClickListener()
-        view.iv_profile.setOnClickListener{
-            Intent(activity,ProfileActivity :: class.java).apply { startActivity(this) }
+        addNetworkStateObserver()
+
+        // shared element animation
+        view.iv_profile.setOnClickListener {
+            Intent(activity, ProfileActivity::class.java).apply {
+                startActivity(
+                    this, ActivityOptions.makeSceneTransitionAnimation(
+                        activity, view.iv_profile,
+                        "iv_profile"
+                    ).toBundle()
+                )
+            }
         }
 
         return view
     }
 
-    private fun setOnClickListener() {
 
+    private fun setOnClickListener() {
 
 
         val intent = Intent(activity, AllMoviesActivity::class.java)
@@ -100,6 +121,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), MovieListAdapter.MovieOnC
                 putExtra(SELECTED_TYPE, NOW_PLAYING)
                 putExtra(SELECTED_TITLE, getString(R.string.now_playing_movies))
                 startActivity(this)
+
             }
         }
         topRatedLayout.tv_view_all.setOnClickListener {
@@ -123,6 +145,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), MovieListAdapter.MovieOnC
                 startActivity(this)
             }
         }
+
     }
 
 
@@ -170,6 +193,8 @@ class HomeFragment : Fragment(R.layout.fragment_home), MovieListAdapter.MovieOnC
         }
         movieViewModel.upComingMovies.observe(requireActivity()) {
             handleChange(it, upComingAdapter)
+
+
         }
     }
 
@@ -177,14 +202,18 @@ class HomeFragment : Fragment(R.layout.fragment_home), MovieListAdapter.MovieOnC
         when (resource) {
             is Resource.Success -> {
                 setProgressBarStatus(adapter.type, false)
-                resource.data?.let { it1 -> adapter.setMoviesList(it1.results) }
+                resource.data?.let { it1 -> adapter.setMoviesList((it1.results).toList()) }
             }
             is Resource.Error -> {
-                Toast.makeText(
-                    requireContext(),
-                    resource.error.status_message,
-                    Toast.LENGTH_LONG
-                ).show()
+                val list = resource.data?.results
+                if (!(list.isNullOrEmpty())) {
+                    setProgressBarStatus(adapter.type, false)
+                    adapter.setMoviesList(list.toList())
+                }
+
+//                if (!isNetworkAvailable(activity as Context) && !comingFromNoInternet)
+//                    showNoConnectionSnackBar()
+
                 setProgressBarStatus(adapter.type, true)
             }
             is Resource.Loading -> {
@@ -237,4 +266,17 @@ class HomeFragment : Fragment(R.layout.fragment_home), MovieListAdapter.MovieOnC
             putExtra(MOVIE_ID, movie.id)
         })
     }
+
+    private fun addNetworkStateObserver() {
+
+        NetworkConnectionLiveData(activity as Context).observe(viewLifecycleOwner) {
+            if (it) {
+                Log.d("Network", "Called ")
+                movieViewModel.fetchAll()
+            }
+
+        }
+    }
+
+
 }

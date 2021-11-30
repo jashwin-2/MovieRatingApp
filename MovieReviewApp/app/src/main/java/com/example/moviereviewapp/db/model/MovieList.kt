@@ -1,4 +1,4 @@
-package com.example.moviereviewapp.db
+package com.example.moviereviewapp.db.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

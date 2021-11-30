@@ -67,7 +67,7 @@ class LoginViewModel : ViewModel() {
             sessionId.postValue(response)
             if (response is Resource.Success) {
                 val accResponse = withContext(Dispatchers.IO) {
-                    getAccount()
+                    getAccount(response.data!!.session_id)
                 }
                 if (accResponse is Resource.Success<*>)
                     this@LoginViewModel.loginResponse.postValue(loginResponse)
@@ -78,11 +78,12 @@ class LoginViewModel : ViewModel() {
         }
     }
 
-    suspend fun getAccount(): Resource<Account> {
-            account.postValue(Resource.Loading())
-            val response = loginRepository.getAccount(sessionId.value!!.data!!.session_id)
-            account.postValue(response)
-            return response
+    suspend fun getAccount(sessionId: String): Resource<Account> {
+        account.postValue(Resource.Loading())
+        val response = loginRepository.getAccount(sessionId)
+        account.postValue(response)
+        return response
+
     }
 
     private fun createJsonRequestBody(vararg params: Pair<String, String>) =

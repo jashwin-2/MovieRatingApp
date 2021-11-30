@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,11 +22,14 @@ import com.example.moviereviewapp.ui.adapter.MovieListAdapter
 import com.example.moviereviewapp.ui.viewModel.MovieViewModel
 import com.example.moviereviewapp.ui.viewModel.SharedViewModel
 import com.example.moviereviewapp.utils.MyScrollListener
+import com.example.moviereviewapp.utils.NetworkConnectionLiveData
 import com.example.moviereviewapp.utils.Resource
+import com.facebook.shimmer.ShimmerFrameLayout
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.fragment_search_result.view.*
 
-class SearchResultFragment : Fragment(R.layout.fragment_search_result), MovieListAdapter.MovieOnClickListener {
+class SearchResultFragment : Fragment(R.layout.fragment_search_result),
+    MovieListAdapter.MovieOnClickListener {
 
     lateinit var movieViewModel: MovieViewModel
     lateinit var adapter: AllMovieListAdapter
@@ -33,15 +37,17 @@ class SearchResultFragment : Fragment(R.layout.fragment_search_result), MovieLis
     lateinit var sharedViewModel: SharedViewModel
     lateinit var myScrollListener: MyScrollListener
     lateinit var recyclerView: RecyclerView
+    lateinit var shimmerLayout: ShimmerFrameLayout
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_search_result,search_fragment_container,false)
+        val view =
+            inflater.inflate(R.layout.fragment_search_result, search_fragment_container, false)
 
-       sharedViewModel = ViewModelProvider(requireActivity()).get(SharedViewModel :: class.java)
+        sharedViewModel = ViewModelProvider(requireActivity()).get(SharedViewModel::class.java)
         ViewModelProvider(
             this,
             ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().application)
@@ -49,44 +55,49 @@ class SearchResultFragment : Fragment(R.layout.fragment_search_result), MovieLis
             movieViewModel = it
         }
         if (savedInstanceState != null)
-            setUpScrollListener(sharedViewModel.queryText.value?:"")
+            setUpScrollListener(sharedViewModel.queryText.value ?: "")
 
         recyclerView = view.rv_result
         paginationProgressBar = view.progress_circular_search
+        shimmerLayout = view.findViewById(R.id.shimmer_layout_search)
 
         addObserver()
         setRecyclerView(view)
-
+        addNetworkStateObserver()
         return view
     }
 
     private fun addObserver() {
-            movieViewModel.searchMoviesList.observe(viewLifecycleOwner) {
+        var firstPage = movieViewModel.searchMoviesPageCount == 1
+        movieViewModel.searchMoviesList.observe(viewLifecycleOwner) {
+            when (it) {
+                is Resource.Success -> {
+                    shimmerLayout.stopShimmer()
+                    shimmerLayout.isVisible = false
+                    firstPage = false
+                    hideProgressBar()
+                    adapter.setMoviesList(it.data?.results?.toList() ?: listOf())
+                    val totalPage = it.data!!.total_pages
+                    myScrollListener.isLastPage = it.data.page == totalPage
 
-                when (it) {
-                    is Resource.Success -> {
-                        hideProgressBar()
-                        adapter.setMoviesList(it.data?.results?.toList() ?: listOf())
-                        val totalPage = it.data!!.total_pages
-                        myScrollListener.isLastPage = it.data.page == totalPage
-
-                    }
-                    is Resource.Error -> {
-                        hideProgressBar()
-                        Toast.makeText(
-                            context,
-                            it.error.status_message,
-                            Toast.LENGTH_LONG
-                        ).show()
-
-                    }
-                    is Resource.Loading -> {
+                }
+                is Resource.Error -> {
+                    if (!firstPage)
                         showProgressBar()
+                    else
+                        hideProgressBar()
+                }
+                is Resource.Loading -> {
+                    if (firstPage) {
+                        shimmerLayout.visibility = View.VISIBLE
+                        shimmerLayout.startShimmer()
                     }
+                    showProgressBar()
                 }
             }
+        }
 
-        sharedViewModel.queryText.observe(viewLifecycleOwner){
+        sharedViewModel.queryText.observe(viewLifecycleOwner) {
             if (it.isNotEmpty()) {
                 setUpScrollListener(it)
                 recyclerView.addOnScrollListener(myScrollListener)
@@ -125,5 +136,13 @@ class SearchResultFragment : Fragment(R.layout.fragment_search_result), MovieLis
         startActivity(Intent(activity, MovieDetailActivity::class.java).apply {
             putExtra(HomeFragment.MOVIE_ID, movie.id)
         })
+    }
+
+    private fun addNetworkStateObserver() {
+        NetworkConnectionLiveData(activity as Context).observe(viewLifecycleOwner) {
+            if (it)
+                movieViewModel.searchMovies(sharedViewModel.queryText.value!!)
+        }
+
     }
 }

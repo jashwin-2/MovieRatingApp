@@ -1,7 +1,14 @@
-package com.example.moviereviewapp.model
+package com.example.moviereviewapp.db.model
 
+import androidx.room.Entity
 
-data class Movie(
+import androidx.room.PrimaryKey
+@Entity(
+    tableName = "movies"
+)
+data class MovieEntity(
+
+    @PrimaryKey(autoGenerate = false)
     val id: Int,
     val adult: Boolean,
     val backdrop_path: String?,
@@ -15,5 +22,6 @@ data class Movie(
     val title: String,
     val video: Boolean,
     val vote_average: Double,
-    val vote_count: Int
+    val vote_count: Int,
+    val addedTime : Long
 )

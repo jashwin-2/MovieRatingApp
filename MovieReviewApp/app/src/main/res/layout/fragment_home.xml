@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/home_layout"
     android:background="@color/grey_layout_bg"
     tools:context=".ui.fragments.HomeFragment">
 
@@ -44,6 +45,7 @@
                 <ImageView
                     android:id="@+id/iv_profile"
                     android:layout_width="40dp"
+                    android:transitionName="iv_profile"
                     android:layout_height="40dp"
                     android:layout_alignParentEnd="true"
                     android:layout_gravity="end"

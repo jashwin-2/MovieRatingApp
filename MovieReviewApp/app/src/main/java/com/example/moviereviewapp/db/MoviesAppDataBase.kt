@@ -6,8 +6,10 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.example.moviereviewapp.db.model.Genre
+import com.example.moviereviewapp.db.model.MovieEntity
+import com.example.moviereviewapp.db.model.MovieList
 import com.example.moviereviewapp.db.relation.MovieListMovieCrossRef
-import com.example.moviereviewapp.model.Movie
 import com.example.moviereviewapp.utils.Constants.FAVORITE_MOVIES
 import com.example.moviereviewapp.utils.Constants.NOW_PLAYING_MOVIES
 import com.example.moviereviewapp.utils.Constants.POPULAR_MOVIES
@@ -19,9 +21,10 @@ import kotlinx.coroutines.launch
 
 @Database(
     entities = [
-        Movie::class,
+        MovieEntity::class,
         MovieList::class,
-        MovieListMovieCrossRef::class],
+        MovieListMovieCrossRef::class,
+        Genre::class],
     version = 1
 )
 @TypeConverters(Converters::class)
@@ -61,4 +64,6 @@ abstract class MoviesAppDataBase : RoomDatabase() {
             }
         }
     }
+
+
 }

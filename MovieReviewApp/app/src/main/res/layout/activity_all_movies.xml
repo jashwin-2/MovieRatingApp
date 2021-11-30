@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/layout_all_movies"
     android:background="@color/grey_layout_bg"
     tools:context=".ui.activity.AllMoviesActivity">
 

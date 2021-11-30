@@ -2,9 +2,8 @@ package com.example.moviereviewapp.ui.viewModel
 
 import android.app.Application
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
+import com.example.moviereviewapp.db.model.Genre
 import com.example.moviereviewapp.model.*
 import com.example.moviereviewapp.repository.MovieRepository
 import com.example.moviereviewapp.ui.activity.MovieDetailActivity.Companion.FAVORITE
@@ -23,8 +22,8 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
     val addOrRemoveWatchListResponse = MutableLiveData<Response<Unit>>()
 
 
-    val favoriteMovies: MutableLiveData<Resource<MovieListResponse>> = MutableLiveData()
-    val watchListMovies: MutableLiveData<Resource<MovieListResponse>> = MutableLiveData()
+    val favoriteMovies: MutableLiveData<Resource<MovieListResponse?>> = MutableLiveData()
+    val watchListMovies: MutableLiveData<Resource<MovieListResponse?>> = MutableLiveData()
 
     val genreMovieList: MutableLiveData<Resource<MovieListResponse>> = MutableLiveData()
     var genrePageCount = 1
@@ -35,23 +34,27 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
     var searchResponse = MovieResponse()
 
     var movieDetails: MutableLiveData<Resource<MovieFullDetail>> = MutableLiveData()
-    val popularMovies: MutableLiveData<Resource<MovieListResponse>> = MutableLiveData()
+    var popularMovies: MutableLiveData<Resource<MovieListResponse>> = MutableLiveData()
     var popularMoviesPageCount = 1
     var popularMovieResponse = MovieResponse()
 
-    val upComingMovies: MutableLiveData<Resource<MovieListResponse>> = MutableLiveData()
+    var upComingMovies: MutableLiveData<Resource<MovieListResponse>> = MutableLiveData()
     var upComingMoviesPageCount = 1
     var upComingMovieResponse = MovieResponse()
 
-    val topRatedMovies: MutableLiveData<Resource<MovieListResponse>> = MutableLiveData()
+    var topRatedMovies: MutableLiveData<Resource<MovieListResponse>> = MutableLiveData()
     var topRatedMoviesPageCount = 1
     var topRatedMovieResponse = MovieResponse()
 
-    val nowPlaying: MutableLiveData<Resource<MovieListResponse>> = MutableLiveData()
+    var nowPlaying: MutableLiveData<Resource<MovieListResponse>> = MutableLiveData()
     var nowPlayingMoviesPageCount = 1
     var nowPlayingMovieResponse = MovieResponse()
 
     init {
+        fetchAll()
+    }
+
+     fun fetchAll() {
         getAllGenres()
         getPopularMovies()
         getNowPlayingMovies()
@@ -60,29 +63,28 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
     }
 
 
-    var allGenres : MutableLiveData<List<Genre>> = MutableLiveData()
+    var allGenres: MutableLiveData<List<Genre>> = MutableLiveData()
 
-     fun getAllGenres() {
+    fun getAllGenres() {
         viewModelScope.launch {
             val response = movieRepository.getAllGenres()
-            if (response is Resource.Success)
-                allGenres.postValue(response.data?.genres ?: listOf())
+            if (!response.data.isNullOrEmpty())
+                allGenres.postValue(response.data ?: listOf())
         }
     }
 
     fun getPopularMovies() {
-
         viewModelScope.launch {
             popularMovies.postValue(Resource.Loading())
             val response = movieRepository.getMoviesList(
                 POPULAR_MOVIES,
                 popularMoviesPageCount
             )
-            if (response is Resource.Success) {
+            if (response is Resource.Success ) {
                 popularMoviesPageCount++
                 popularMovies.postValue(handlePagination(response, popularMovieResponse))
             } else
-                nowPlaying.postValue(response)
+                popularMovies.postValue(response)
         }
     }
 
@@ -93,28 +95,33 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
                 UPCOMING_MOVIES,
                 upComingMoviesPageCount
             )
+            Log.d("Pagination", "vv ${response.data?.results?.size}")
             if (response is Resource.Success) {
                 upComingMoviesPageCount++
                 upComingMovies.postValue(handlePagination(response, upComingMovieResponse))
             } else
-                nowPlaying.postValue(response)
+                upComingMovies.postValue(response)
+
         }
     }
 
     fun getTopRatedMovies() {
+        Log.d("Pagination", "getTop $topRatedMoviesPageCount")
+
         viewModelScope.launch {
             topRatedMovies.postValue(Resource.Loading())
             val response = movieRepository.getMoviesList(
                 TOP_RATED_MOVIES,
                 topRatedMoviesPageCount
             )
-            if (response is Resource.Success) {
+            if (response is Resource.Success ) {
                 topRatedMoviesPageCount++
                 topRatedMovies.postValue(handlePagination(response, topRatedMovieResponse))
             } else
-                nowPlaying.postValue(response)
+                topRatedMovies.postValue(response)
         }
     }
+
 
     fun getNowPlayingMovies() {
         viewModelScope.launch {
@@ -123,6 +130,8 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
                 NOW_PLAYING_MOVIES,
                 nowPlayingMoviesPageCount
             )
+            Log.d("Pagination", "vv ${response.data?.results?.size}")
+
             if (response is Resource.Success) {
                 nowPlayingMoviesPageCount++
                 nowPlaying.postValue(handlePagination(response, nowPlayingMovieResponse))
@@ -229,9 +238,15 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
         return Resource.Success(previousResponse.movieResponse!!)
     }
 
-    fun rateTheMovie(movieId: Int, sessionId: String,rating : Double) {
+    fun rateTheMovie(movieId: Int, sessionId: String, rating: Double) {
         viewModelScope.launch {
-            rateMovieResponse.postValue(movieRepository.rateTheMovie(movieId, sessionId, Rating(rating)))
+            rateMovieResponse.postValue(
+                movieRepository.rateTheMovie(
+                    movieId,
+                    sessionId,
+                    Rating(rating)
+                )
+            )
 
         }
     }

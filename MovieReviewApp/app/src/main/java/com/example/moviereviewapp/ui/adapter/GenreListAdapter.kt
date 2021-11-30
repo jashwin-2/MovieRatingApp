@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.moviereviewapp.R
-import com.example.moviereviewapp.model.Genre
+import com.example.moviereviewapp.db.model.Genre
 import com.example.moviereviewapp.ui.view.AppTextView
 import kotlinx.android.synthetic.main.genre_title_holder.view.*
 

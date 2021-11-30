@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
@@ -20,7 +21,7 @@ import kotlinx.android.synthetic.main.fragment_search_home.view.*
 
 class SearchHomeFragment : Fragment(R.layout.fragment_search_home), GereOnClickListener,
     GenreAllClickListener {
-    lateinit var allGenreFragment: SelectGenreFragment
+    var allGenreFragment: SelectGenreFragment? = null
     lateinit var movieViewModel: MovieViewModel
 
     companion object {
@@ -76,7 +77,10 @@ class SearchHomeFragment : Fragment(R.layout.fragment_search_home), GereOnClickL
 
     override fun onClick(genre: GenreHolder) {
         if (genre.id == 0)
-            allGenreFragment.show(childFragmentManager, "All Genres")
+            if (allGenreFragment != null)
+                allGenreFragment?.show(childFragmentManager, "All Genres")
+            else
+                Toast.makeText(activity, "Need Internet to load data", Toast.LENGTH_SHORT).show()
         else
             startActivity(Intent(activity, AllMoviesActivity::class.java).apply {
                 putExtra(GENRE_ID, genre.id)
@@ -86,11 +90,13 @@ class SearchHomeFragment : Fragment(R.layout.fragment_search_home), GereOnClickL
     }
 
     override fun onClick(id: Int, name: String) {
-        allGenreFragment.dismiss()
+        allGenreFragment?.dismiss()
         startActivity(Intent(activity, AllMoviesActivity::class.java).apply {
             putExtra(GENRE_ID, id)
             putExtra(AllMoviesActivity.SELECTED_TYPE, AllMoviesActivity.GENRE_MOVIES)
             putExtra(AllMoviesActivity.SELECTED_TITLE, name)
         })
+
+
     }
 }

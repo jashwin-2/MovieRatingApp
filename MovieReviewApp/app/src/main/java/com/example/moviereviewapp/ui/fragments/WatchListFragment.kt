@@ -64,11 +64,11 @@ class WatchListFragment : Fragment(R.layout.fragment_favorite),
             accountId = fetchAccId()
             sessionId = fetchAuthToken()!!
         }
+        movieViewModel.getWatchListMovies(accountId,sessionId)
 
         watchListRv = view.rv_watch_list
         shimmerFrameLayout = view.findViewById(R.id.shimmer_layout_watchlist)
 
-        movieViewModel.getWatchListMovies(id, sessionId)
         watchAdapter = AllMovieListAdapter(requireContext(), this)
         addObservers()
 
@@ -135,12 +135,6 @@ class WatchListFragment : Fragment(R.layout.fragment_favorite),
         if (!hidden)
             movieViewModel.getWatchListMovies(accountId, sessionId)
     }
-
-    override fun onResume() {
-        super.onResume()
-        movieViewModel.getWatchListMovies(accountId, sessionId)
-    }
-
 
     private fun setUpRecyclerView() {
         watchListRv.adapter = watchAdapter

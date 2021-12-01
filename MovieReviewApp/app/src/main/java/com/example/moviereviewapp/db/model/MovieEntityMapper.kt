@@ -52,20 +52,8 @@ class MovieEntityMapper : NetworkMapper<Movie, MovieEntity> {
     fun getMovieEntityFromList(list: List<Movie>) = list.map { mapToDbModel(it) }
     fun getMovieFromMovieEntityList(list: List<MovieEntity>) = list.map { mapFromDbModel(it) }
 
-    fun getSavedMovies(list: List<MovieEntity>, page: Int): List<Movie> {
-        var newList = list.sortedBy { it.addedTime }
-//        var toIndex = 0
-//        val totalPages = (newList.size + 1) / QUERY_PAGE_SIZE
-//
-//        if (totalPages == 0)
-//            return emptyList()
-//        toIndex = when {
-//            page == 1 -> 20
-//            totalPages > page -> (page * QUERY_PAGE_SIZE)
-//
-//            else -> return emptyList()
-//        }
-        Log.d("Pagination", "${newList.size} mun")
+    fun getSavedMovies(list: List<MovieEntity>): List<Movie> {
+        var newList = list.sortedByDescending { it.addedTime }
 
 
          //   newList.subList(toIndex - 20, toIndex)

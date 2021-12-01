@@ -57,10 +57,10 @@ class FavoriteFragment : Fragment(R.layout.fragment_favorite),
             accountId = fetchAccId()
             sessionId = fetchAuthToken()!!
         }
+        movieViewModel.getFavoriteMovies(accountId,sessionId)
         favRecyclerView = view.findViewById(R.id.rv_favorite)
         shimmerFrameLayout = view.findViewById(R.id.shimmer_layout)
 
-        movieViewModel.getFavoriteMovies(accountId, sessionId)
         favAdapter = AllMovieListAdapter(requireContext(), this)
         addObservers()
 
@@ -84,10 +84,6 @@ class FavoriteFragment : Fragment(R.layout.fragment_favorite),
             movieViewModel.getFavoriteMovies(accountId, sessionId)
     }
 
-    override fun onResume() {
-        super.onResume()
-        movieViewModel.getFavoriteMovies(accountId, sessionId)
-    }
 
     private fun addObservers() {
         movieViewModel.favoriteMovies.observe(viewLifecycleOwner) {

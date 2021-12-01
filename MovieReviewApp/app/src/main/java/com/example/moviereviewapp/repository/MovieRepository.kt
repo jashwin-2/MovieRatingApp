@@ -13,8 +13,6 @@ import com.example.moviereviewapp.utils.Constants
 import com.example.moviereviewapp.utils.Constants.FAVORITE_MOVIES
 import com.example.moviereviewapp.utils.Constants.WATCHLIST_MOVIES
 import com.example.moviereviewapp.utils.Resource
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import networkBoundResource
 
 class MovieRepository(application: Application) : Repository() {
@@ -42,7 +40,6 @@ class MovieRepository(application: Application) : Repository() {
                 it.data!!
             }
         )
-        //return Resource.Success(flow.flatMapConcat { it.data!!.asFlow() }.toList())
     }
 
 
@@ -87,7 +84,28 @@ class MovieRepository(application: Application) : Repository() {
         )
 
     suspend fun getMoviesByGenre(id: Int, genrePageCount: Int) =
-        safeApiCall { movieService.getMoviesByGenre(id, Constants.KEY, genrePageCount) }
+        networkBoundResource(
+            queryLocalData = { getMoviesOfGenre(id) },
+            fetch = {
+                safeApiCall { movieService.getMoviesByGenre(id, Constants.KEY, genrePageCount) }
+            },
+            saveFetchResult = { response, _ ->
+                moviesDao.insertMovies(
+                    mapper.getMovieEntityFromList(response.data?.results?.toList() ?: emptyList())
+                )
+            },
+            queryCurrent = {
+                it.data!!
+            }
+        )
+
+
+    private fun getMoviesOfGenre(id: Int): MovieListResponse {
+        var list =
+            mapper.getMovieFromMovieEntityList(moviesDao.getAllMovies().sortedByDescending { it.addedTime })
+        list = list.filter { it.genre_ids.contains(id) }
+        return MovieListResponse(1, list.toMutableList(), 1)
+    }
 
     suspend fun addOrRemoveMovieToFavorite(body: FavoriteBody, sessionId: String, accountId: Int) =
 
@@ -121,7 +139,7 @@ class MovieRepository(application: Application) : Repository() {
         networkBoundResource(
             queryLocalData = { moviesDao.getGenres() },
             fetch = {
-                safeApiCall{
+                safeApiCall {
                     movieService.getAllGenres(Constants.KEY)
                 }
             },
@@ -142,10 +160,27 @@ class MovieRepository(application: Application) : Repository() {
         )
 
         if (type != null) {
-            val list = mutableListOf<MovieListMovieCrossRef>()
-            movies.forEach { list.add(MovieListMovieCrossRef(type, it.id)) }
-            moviesDao.insertMoviesListMoviesCrossRefs(list)
+            when (type) {
+                WATCHLIST_MOVIES -> moviesDao.deleteAndAddWatchList(getMoviesCrossRef(movies, type))
+                FAVORITE_MOVIES -> moviesDao.deleteAndAddFavoriteList(
+                    getMoviesCrossRef(
+                        movies,
+                        type
+                    )
+                )
+                else -> moviesDao.insertMoviesListMoviesCrossRefs(getMoviesCrossRef(movies, type))
+            }
+
         }
+    }
+
+    private fun getMoviesCrossRef(
+        movies: List<Movie>,
+        type: String
+    ): MutableList<MovieListMovieCrossRef> {
+        val list = mutableListOf<MovieListMovieCrossRef>()
+        movies.forEach { list.add(MovieListMovieCrossRef(type, it.id)) }
+        return list
     }
 
 
@@ -154,11 +189,11 @@ class MovieRepository(application: Application) : Repository() {
         var movies: List<Movie>
         try {
             movies = mapper.getSavedMovies(
-                moviesDao.getMoviesOfList(type).movies, page
+                moviesDao.getMoviesOfList(type).movies
             )
         } catch (e: Exception) {
             Log.d("Pagination", "${e} rep")
-            return MovieListResponse(0, mutableListOf())
+            return MovieListResponse(0, mutableListOf(), 0)
         }
 
         totalPage = page

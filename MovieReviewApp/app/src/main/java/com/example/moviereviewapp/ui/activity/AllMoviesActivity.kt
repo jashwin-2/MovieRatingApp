@@ -196,7 +196,7 @@ class AllMoviesActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickList
                         myScrollListener.isLastPage = true
                         if (movies.isNotEmpty())
                             loadReceivedStoredData(movies)
-                    } else if ( type != GENRE_MOVIES)
+                    } else
                         Snackbar.make(
                             this.layout_all_movies,
                             "No Connection",
@@ -262,7 +262,7 @@ class AllMoviesActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickList
         super.onResume()
         if (!isNetworkAvailable(this))
             showNoConnectionSnackBar()
-        else {
+        else if(comingFromNoInternet) {
             refresh()
             snackbar.dismiss()
             comingFromNoInternet = false

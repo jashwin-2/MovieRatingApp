@@ -21,6 +21,7 @@ class HomeActivity : AppCompatActivity() {
     private val favoriteFragment = FavoriteFragment()
     private val searchFragment = SearchFragment()
     var snackbar: Snackbar? = null
+    lateinit var networkLiveData : NetworkConnectionLiveData
 
     private val watchListFragment = WatchListFragment()
     private var currentFragment = HOME_FRAGMENT
@@ -112,11 +113,14 @@ class HomeActivity : AppCompatActivity() {
 
     private fun addNetworkStateObserver() {
 
-        NetworkConnectionLiveData(this).observe(this) {
+        networkLiveData.observe(this) {
+            Log.d("Snack", "$it")
             if (!it)
                 showNoConnectionSnackBar()
             else if (it && comingFromNoInternet) {
+                snackbar?.dismiss()
                 val bottom = this.bottomNavigationView
+                Log.d("Snack", "green snack")
                 Snackbar.make(
                     this.fragment_container,
                     "Back Online",
@@ -130,7 +134,9 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun showNoConnectionSnackBar() {
-        snackbar?.show()
+        if (snackbar==null)
+            initializeSnackBar()
+        snackbar!!.show()
         comingFromNoInternet = true
         Log.d("Network", "showNoConn")
     }
@@ -145,18 +151,26 @@ class HomeActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
+        Log.d("Snack", "onResu")
         super.onResume()
+        networkLiveData = NetworkConnectionLiveData(this)
         if (isNetworkAvailable(this))
             comingFromNoInternet = false
 
         else
             showNoConnectionSnackBar()
         addNetworkStateObserver()
-
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onPause() {
+        super.onPause()
+        Log.d("Snack", "onPause: ")
+        networkLiveData.removeObservers(this)
+    }
+
+
+    override fun onStop() {
+        super.onStop()
         snackbar?.dismiss()
     }
 }

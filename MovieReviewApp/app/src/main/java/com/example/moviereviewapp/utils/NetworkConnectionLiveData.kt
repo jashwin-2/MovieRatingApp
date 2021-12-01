@@ -20,6 +20,7 @@ class NetworkConnectionLiveData(context: Context) : LiveData<Boolean>() {
     private val validNetworks: MutableSet<Network> = HashSet()
 
     private fun checkValidNetworks() {
+        Log.d("Snack", "${validNetworks.size}")
         postValue(validNetworks.size > 0)
     }
 

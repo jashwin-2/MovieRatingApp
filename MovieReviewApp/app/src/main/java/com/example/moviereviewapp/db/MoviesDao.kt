@@ -10,13 +10,13 @@ import com.example.moviereviewapp.db.relation.MoviesListWithMovies
 @Dao
 interface MoviesDao {
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMovies(movies: List<MovieEntity>)
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMoviesList(lists: List<MovieList>)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertMoviesListMoviesCrossRefs(relationList: List<MovieListMovieCrossRef>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -25,8 +25,29 @@ interface MoviesDao {
     @Query("SELECT * FROM genres")
     fun getGenres(): List<Genre>
 
+    @Query("DELETE FROM movielistmoviecrossref WHERE listName = :WATCH_LIST ")
+    suspend fun deleteWatchlist(WATCH_LIST : String = "watchlist_movies")
+
+    @Query("DELETE FROM movielistmoviecrossref WHERE listName = :FAVORITE ")
+    suspend fun deleteFavoriteList(FAVORITE : String = "favorite_movies")
+
     @Transaction
     @Query("SELECT * FROM movies_list WHERE listName = :moviesListName")
     fun getMoviesOfList(moviesListName: String): MoviesListWithMovies
+
+    @Transaction
+    suspend fun deleteAndAddWatchList(relationList: List<MovieListMovieCrossRef>){
+        deleteWatchlist()
+        insertMoviesListMoviesCrossRefs(relationList)
+    }
+
+    @Query("SELECT * FROM movies")
+    fun getAllMovies() : List<MovieEntity>
+
+    @Transaction
+    suspend fun deleteAndAddFavoriteList(relationList: List<MovieListMovieCrossRef>){
+        deleteFavoriteList()
+        insertMoviesListMoviesCrossRefs(relationList)
+    }
 
 }

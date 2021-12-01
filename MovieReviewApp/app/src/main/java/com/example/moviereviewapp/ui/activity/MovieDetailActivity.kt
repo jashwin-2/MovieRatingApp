@@ -287,6 +287,9 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
         val generes = movie.genres
         val time = if (generes.size >= 4) 4 else generes.size
         var i = 0
+
+        if (cg_geners.childCount !=0 )
+            return
         while (i < time) {
             Chip(this).apply {
                 id = generes[i].id

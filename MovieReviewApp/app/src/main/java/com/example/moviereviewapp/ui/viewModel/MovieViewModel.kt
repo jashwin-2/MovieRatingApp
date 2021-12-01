@@ -179,7 +179,7 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
     fun getMoviesListByGenre(id: Int) {
         viewModelScope.launch {
             genreMovieList.postValue(Resource.Loading())
-            val response = movieRepository.getMoviesByGenre(id, genrePageCount)
+            val response  : Resource<MovieListResponse> = movieRepository.getMoviesByGenre(id, genrePageCount)
             if (response is Resource.Success) {
                 genrePageCount++
                 genreMovieList.postValue(handlePagination(response, genreMovieResponse))

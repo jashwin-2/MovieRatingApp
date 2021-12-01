@@ -43,7 +43,7 @@ class MovieListAdapter(
         val movie = oldMovieList[position]
         holder.title.text = movie.title
         holder.rating.text = movie.vote_average.toString()
-        holder.releaserYear.text = movie.release_date.slice(0..3)
+        holder.releaserYear.text = movie.release_date?.slice(0..3) ?: "not released"
         val url = Constants.IMAGE_BASE_URL + movie.poster_path
         Glide.with(context)
             .load(url)

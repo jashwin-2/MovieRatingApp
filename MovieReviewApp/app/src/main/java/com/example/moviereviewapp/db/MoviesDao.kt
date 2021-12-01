@@ -50,4 +50,6 @@ interface MoviesDao {
         insertMoviesListMoviesCrossRefs(relationList)
     }
 
+    @Query("SELECT * FROM movies WHERE original_title LIKE '%' || :search || '%'")
+    fun searchMovies(search : String) : List<MovieEntity>
 }

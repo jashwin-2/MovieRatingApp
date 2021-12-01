@@ -68,4 +68,10 @@ class AllMovieListAdapter(
         oldMovies = newList
         diffResult.dispatchUpdatesTo(this)
     }
+
+    fun clearRecyclerView() {
+        if (oldMovies.isNotEmpty())
+            oldMovies = emptyList()
+        notifyDataSetChanged()
+    }
 }

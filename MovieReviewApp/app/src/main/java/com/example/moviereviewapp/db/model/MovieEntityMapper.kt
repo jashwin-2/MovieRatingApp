@@ -2,7 +2,6 @@ package com.example.moviereviewapp.db.model
 
 import android.util.Log
 import com.example.moviereviewapp.model.Movie
-import com.example.moviereviewapp.utils.Constants.QUERY_PAGE_SIZE
 import com.example.moviereviewapp.utils.NetworkMapper
 
 class MovieEntityMapper : NetworkMapper<Movie, MovieEntity> {
@@ -53,7 +52,7 @@ class MovieEntityMapper : NetworkMapper<Movie, MovieEntity> {
     fun getMovieFromMovieEntityList(list: List<MovieEntity>) = list.map { mapFromDbModel(it) }
 
     fun getSavedMovies(list: List<MovieEntity>): List<Movie> {
-        var newList = list.sortedByDescending { it.addedTime }
+        var newList = list.sortedBy { it.addedTime }
 
 
          //   newList.subList(toIndex - 20, toIndex)

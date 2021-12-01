@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,25 +21,13 @@ import com.example.moviereviewapp.ui.viewModel.MovieViewModel
 import com.example.moviereviewapp.utils.NetworkConnectionLiveData
 import com.example.moviereviewapp.utils.Resource
 import com.example.moviereviewapp.utils.SessionManager
-import com.example.moviereviewapp.utils.isNetworkAvailable
 import com.facebook.shimmer.ShimmerFrameLayout
-import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.activity_all_movies.*
-import kotlinx.android.synthetic.main.activity_home.*
-import kotlinx.android.synthetic.main.fragment_home.view.*
 import kotlinx.android.synthetic.main.fragment_watchlist.view.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.net.ConnectException
 
 class WatchListFragment : Fragment(R.layout.fragment_favorite),
     MovieListAdapter.MovieOnClickListener {
 
     private lateinit var shimmerFrameLayout: ShimmerFrameLayout
-
-
-    var comingFromNoInternet = false
     lateinit var watchListRv: RecyclerView
     lateinit var movieViewModel: MovieViewModel
     lateinit var watchAdapter: AllMovieListAdapter
@@ -53,7 +40,6 @@ class WatchListFragment : Fragment(R.layout.fragment_favorite),
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_watchlist, container, false)
-        // movieViewModel = ViewModelProvider(this).get(MovieViewModel::class.java)
         ViewModelProvider(
             this,
             ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().application)
@@ -64,7 +50,6 @@ class WatchListFragment : Fragment(R.layout.fragment_favorite),
             accountId = fetchAccId()
             sessionId = fetchAuthToken()!!
         }
-        movieViewModel.getWatchListMovies(accountId,sessionId)
 
         watchListRv = view.rv_watch_list
         shimmerFrameLayout = view.findViewById(R.id.shimmer_layout_watchlist)
@@ -72,6 +57,14 @@ class WatchListFragment : Fragment(R.layout.fragment_favorite),
         watchAdapter = AllMovieListAdapter(requireContext(), this)
         addObservers()
 
+        setClickListenerToProfileIv(view)
+        setUpRecyclerView()
+        addNetworkStateObserver()
+
+        return view
+    }
+
+    private fun setClickListenerToProfileIv(view: View) {
         view.iv_profile_watchlist.setOnClickListener {
             Intent(activity, ProfileActivity::class.java).apply {
                 startActivity(
@@ -80,55 +73,46 @@ class WatchListFragment : Fragment(R.layout.fragment_favorite),
                         "iv_profile"
                     ).toBundle()
                 )
-            }        }
-
-        setUpRecyclerView()
-        addNetworkStateObserver()
-
-        return view
+            }
+        }
     }
 
     private fun addObservers() {
         movieViewModel.watchListMovies.observe(viewLifecycleOwner) {
             val newList = it.data?.results ?: listOf()
             when (it) {
-                is Resource.Success -> {
-
-                    shimmerFrameLayout.stopShimmer()
-                    shimmerFrameLayout.visibility = View.GONE
-                    watchListRv.visibility = View.VISIBLE
-                    adjustScrollPositionIfChanged(newList)
-
-                    watchAdapter.setMoviesList(newList)
-                }
+                is Resource.Success ->
+                    loadMoviesToRv(newList)
 
                 is Resource.Loading -> shimmerFrameLayout.startShimmer()
 
-                is Resource.Error -> {
-                    if (!newList.isNullOrEmpty()) {
-                        shimmerFrameLayout.stopShimmer()
-                        shimmerFrameLayout.visibility = View.GONE
-                        watchListRv.visibility = View.VISIBLE
-                        adjustScrollPositionIfChanged(newList)
+                is Resource.Error ->
+                    if (!newList.isNullOrEmpty())
+                        loadMoviesToRv(newList)
 
-                        watchAdapter.setMoviesList(newList)
-                    }
-
-                }
             }
-
         }
+    }
+
+    private fun loadMoviesToRv(newList: List<Movie>) {
+        shimmerFrameLayout.stopShimmer()
+        shimmerFrameLayout.visibility = View.GONE
+        watchListRv.visibility = View.VISIBLE
+        adjustScrollPositionIfChanged(newList)
+        watchAdapter.setMoviesList(newList)
     }
 
     private fun adjustScrollPositionIfChanged(newList: List<Movie>) {
 
-        if (!(newList.size <= watchAdapter.itemCount && watchAdapter.oldMovies.containsAll(
-                newList
-            ))
-        )
+        if (isBothListsAreDifferent(newList))
             watchListRv.layoutManager?.scrollToPosition(0)
     }
 
+    private fun isBothListsAreDifferent(newList: List<Movie>): Boolean {
+        return !(newList.size <= watchAdapter.itemCount && watchAdapter.oldMovies.containsAll(
+            newList
+        ))
+    }
 
     override fun onHiddenChanged(hidden: Boolean) {
         super.onHiddenChanged(hidden)

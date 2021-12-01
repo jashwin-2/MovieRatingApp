@@ -17,7 +17,7 @@ import java.text.DecimalFormat
 import java.util.*
 import kotlin.math.roundToInt
 
-class RatingFragment(val ratingListener: RatingListener) : DialogFragment() {
+class RatingFragment(private val ratingListener: RatingListener) : DialogFragment() {
     private lateinit var slider: FluidSlider
     var rating: Double = 0.0
 
@@ -36,11 +36,15 @@ class RatingFragment(val ratingListener: RatingListener) : DialogFragment() {
 
         slider = view.rating_listener
 
+        setClickListenersToBtns(view)
+        setRatingListener()
+
+    }
+
+    private fun setClickListenersToBtns(view: View) {
         view.iv_close.setOnClickListener {
             dismiss()
         }
-        setRatingListener()
-
         view.btn_rate.setOnClickListener {
             dismiss()
             ratingListener.onRateBtnClicked(rating)

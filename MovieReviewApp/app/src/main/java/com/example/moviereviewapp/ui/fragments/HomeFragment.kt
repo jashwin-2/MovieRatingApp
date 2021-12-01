@@ -5,7 +5,6 @@ import android.app.ActivityOptions
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +12,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.moviereviewapp.R
 import com.example.moviereviewapp.model.Movie
 import com.example.moviereviewapp.model.MovieListResponse
@@ -30,10 +30,7 @@ import com.example.moviereviewapp.ui.viewModel.MovieViewModel
 import com.example.moviereviewapp.utils.NetworkConnectionLiveData
 import com.example.moviereviewapp.utils.Resource
 import com.example.moviereviewapp.utils.SessionManager
-import com.example.moviereviewapp.utils.isNetworkAvailable
 import com.facebook.shimmer.ShimmerFrameLayout
-import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.fragment_home.view.*
 import kotlinx.android.synthetic.main.movie_list_layout.view.*
 
@@ -97,6 +94,12 @@ class HomeFragment : Fragment(R.layout.fragment_home), MovieListAdapter.MovieOnC
         addNetworkStateObserver()
 
         // shared element animation
+        setClickListnerToProfileIv(view)
+
+        return view
+    }
+
+    private fun setClickListnerToProfileIv(view: View) {
         view.iv_profile.setOnClickListener {
             Intent(activity, ProfileActivity::class.java).apply {
                 startActivity(
@@ -107,14 +110,10 @@ class HomeFragment : Fragment(R.layout.fragment_home), MovieListAdapter.MovieOnC
                 )
             }
         }
-
-        return view
     }
 
 
     private fun setOnClickListener() {
-
-
         val intent = Intent(activity, AllMoviesActivity::class.java)
         nowPlayingLayout.tv_view_all.setOnClickListener {
             intent.apply {
@@ -166,19 +165,41 @@ class HomeFragment : Fragment(R.layout.fragment_home), MovieListAdapter.MovieOnC
             popularLayout.recycler_view.layoutManager = this
         }
 
+        setLayoutMangerToRvs(topRatedRecyclerView, nowPlayingRecyclerView, upComingRecyclerView)
+
+        setAdaptersToRvs(
+            popularRecyclerView,
+            topRatedRecyclerView,
+            nowPlayingRecyclerView,
+            upComingRecyclerView
+        )
+        addObservers()
+
+    }
+
+    private fun setAdaptersToRvs(
+        popularRecyclerView: RecyclerView,
+        topRatedRecyclerView: RecyclerView,
+        nowPlayingRecyclerView: RecyclerView,
+        upComingRecyclerView: RecyclerView
+    ) {
+        popularRecyclerView.adapter = popularAdapter
+        topRatedRecyclerView.adapter = topRatedAdapter
+        nowPlayingRecyclerView.adapter = nowPlayingAdapter
+        upComingRecyclerView.adapter = upComingAdapter
+    }
+
+    private fun setLayoutMangerToRvs(
+        topRatedRecyclerView: RecyclerView,
+        nowPlayingRecyclerView: RecyclerView,
+        upComingRecyclerView: RecyclerView
+    ) {
         topRatedRecyclerView.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         nowPlayingRecyclerView.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         upComingRecyclerView.layoutManager =
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-
-        popularRecyclerView.adapter = popularAdapter
-        topRatedRecyclerView.adapter = topRatedAdapter
-        nowPlayingRecyclerView.adapter = nowPlayingAdapter
-        upComingRecyclerView.adapter = upComingAdapter
-        addObservers()
-
     }
 
     private fun addObservers() {
@@ -210,10 +231,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), MovieListAdapter.MovieOnC
                     setProgressBarStatus(adapter.type, false)
                     adapter.setMoviesList(list.toList())
                 }
-
-//                if (!isNetworkAvailable(activity as Context) && !comingFromNoInternet)
-//                    showNoConnectionSnackBar()
-
                 setProgressBarStatus(adapter.type, true)
             }
             is Resource.Loading -> {
@@ -270,10 +287,9 @@ class HomeFragment : Fragment(R.layout.fragment_home), MovieListAdapter.MovieOnC
     private fun addNetworkStateObserver() {
 
         NetworkConnectionLiveData(activity as Context).observe(viewLifecycleOwner) {
-            if (it) {
-                Log.d("Network", "Called ")
+            if (it)
                 movieViewModel.fetchAll()
-            }
+
 
         }
     }

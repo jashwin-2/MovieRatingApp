@@ -82,21 +82,19 @@ class SearchHomeFragment : Fragment(R.layout.fragment_search_home), GereOnClickL
             else
                 Toast.makeText(activity, "Need Internet to load data", Toast.LENGTH_SHORT).show()
         else
-            startActivity(Intent(activity, AllMoviesActivity::class.java).apply {
-                putExtra(GENRE_ID, genre.id)
-                putExtra(AllMoviesActivity.SELECTED_TYPE, AllMoviesActivity.GENRE_MOVIES)
-                putExtra(AllMoviesActivity.SELECTED_TITLE, genre.title)
-            })
+            startAllMoviesActivityWithGenre(genre.id, genre.title)
     }
 
     override fun onClick(id: Int, name: String) {
         allGenreFragment?.dismiss()
+        startAllMoviesActivityWithGenre(id, name)
+    }
+
+    private fun startAllMoviesActivityWithGenre(id: Int, name: String) =
         startActivity(Intent(activity, AllMoviesActivity::class.java).apply {
             putExtra(GENRE_ID, id)
             putExtra(AllMoviesActivity.SELECTED_TYPE, AllMoviesActivity.GENRE_MOVIES)
             putExtra(AllMoviesActivity.SELECTED_TITLE, name)
         })
 
-
-    }
 }

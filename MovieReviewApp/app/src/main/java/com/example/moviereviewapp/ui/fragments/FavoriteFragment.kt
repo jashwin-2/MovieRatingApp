@@ -4,11 +4,9 @@ import android.app.ActivityOptions
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,7 +23,6 @@ import com.example.moviereviewapp.utils.Resource
 import com.example.moviereviewapp.utils.SessionManager
 import com.facebook.shimmer.ShimmerFrameLayout
 import kotlinx.android.synthetic.main.fragment_favorite.view.*
-import kotlinx.android.synthetic.main.fragment_home.view.*
 
 class FavoriteFragment : Fragment(R.layout.fragment_favorite),
     MovieListAdapter.MovieOnClickListener {
@@ -45,7 +42,7 @@ class FavoriteFragment : Fragment(R.layout.fragment_favorite),
     ): View? {
         val view = inflater.inflate(R.layout.fragment_favorite, container, false)
 
-       // movieViewModel = ViewModelProvider(this).get(MovieViewModel::class.java)
+        // movieViewModel = ViewModelProvider(this).get(MovieViewModel::class.java)
         ViewModelProvider(
             this,
             ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().application)
@@ -57,13 +54,19 @@ class FavoriteFragment : Fragment(R.layout.fragment_favorite),
             accountId = fetchAccId()
             sessionId = fetchAuthToken()!!
         }
-        movieViewModel.getFavoriteMovies(accountId,sessionId)
         favRecyclerView = view.findViewById(R.id.rv_favorite)
         shimmerFrameLayout = view.findViewById(R.id.shimmer_layout)
 
         favAdapter = AllMovieListAdapter(requireContext(), this)
         addObservers()
 
+        setClickListenerToProfileIv(view)
+        setUpRecyclerView()
+        addNetworkStateObserver()
+        return view
+    }
+
+    private fun setClickListenerToProfileIv(view: View) {
         view.iv_profile_favorite.setOnClickListener {
             Intent(activity, ProfileActivity::class.java).apply {
                 startActivity(
@@ -72,10 +75,8 @@ class FavoriteFragment : Fragment(R.layout.fragment_favorite),
                         "iv_profile"
                     ).toBundle()
                 )
-            }        }
-        setUpRecyclerView()
-        addNetworkStateObserver()
-        return view
+            }
+        }
     }
 
     override fun onHiddenChanged(hidden: Boolean) {
@@ -91,39 +92,35 @@ class FavoriteFragment : Fragment(R.layout.fragment_favorite),
 
             when (it) {
                 is Resource.Success -> {
-                    shimmerFrameLayout.stopShimmer()
-                    favRecyclerView.visibility = View.VISIBLE
-                    shimmerFrameLayout.visibility = View.GONE
-                    adjustScrollPositionIfChanged(newList)
-
-                    favAdapter.setMoviesList(newList)
+                    loadMoviesToRv(newList)
                 }
                 is Resource.Loading -> shimmerFrameLayout.startShimmer()
                 is Resource.Error -> {
                     if (!newList.isNullOrEmpty())
-                    {
-                        Log.d("Network", "${newList.size} fav")
-                        shimmerFrameLayout.stopShimmer()
-                        favRecyclerView.visibility = View.VISIBLE
-                        shimmerFrameLayout.visibility = View.GONE
-                        adjustScrollPositionIfChanged(newList)
-
-                        favAdapter.setMoviesList(newList)
-
-                    }
+                        loadMoviesToRv(newList)
                 }
             }
 
         }
     }
 
+    private fun loadMoviesToRv(newList: List<Movie>) {
+        shimmerFrameLayout.stopShimmer()
+        favRecyclerView.visibility = View.VISIBLE
+        shimmerFrameLayout.visibility = View.GONE
+        adjustScrollPositionIfChanged(newList)
+        favAdapter.setMoviesList(newList)
+    }
+
     private fun adjustScrollPositionIfChanged(newList: List<Movie>) {
 
-        if (!(newList.size <= favAdapter.itemCount && favAdapter.oldMovies.containsAll(
-                newList
-            ))
-        )
-            favRecyclerView.layoutManager?.scrollToPosition(0)
+        if (isBothListsAreDifferent(newList))
+            favRecyclerView.layoutManager?.scrollToPosition(0)    }
+
+    private fun isBothListsAreDifferent(newList: List<Movie>): Boolean {
+        return !(newList.size <= favAdapter.itemCount && favAdapter.oldMovies.containsAll(
+            newList
+        ))
     }
 
     private fun setUpRecyclerView() {

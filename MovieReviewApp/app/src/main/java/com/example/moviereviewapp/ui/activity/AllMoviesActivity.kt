@@ -84,7 +84,7 @@ class AllMoviesActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickList
     }
 
     private fun initializeSnackBar() {
-        snackbar =Snackbar.make(
+        snackbar = Snackbar.make(
             this.layout_all_movies,
             "No Connection",
             Snackbar.LENGTH_INDEFINITE
@@ -99,28 +99,27 @@ class AllMoviesActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickList
             if (!it)
                 showNoConnectionSnackBar()
             else if (it && comingFromNoInternet) {
-                snackbar.dismiss()
-                Snackbar.make(
-                    this.layout_all_movies,
-                    "Back Online",
-                    Snackbar.LENGTH_SHORT
-                ).apply {
-                    setBackgroundTint(resources.getColor(R.color.green))
-                }.show()
+                showBackToOnlineSnackBar()
                 refresh()
             }
         }
     }
 
+    private fun showBackToOnlineSnackBar() {
+        snackbar.dismiss()
+        Snackbar.make(
+            this.layout_all_movies,
+            "Back Online",
+            Snackbar.LENGTH_SHORT
+        ).apply {
+            setBackgroundTint(resources.getColor(R.color.green))
+        }.show()
+    }
+
     private fun refresh() {
         callCorrespondingMovieType(type)
-        if (myScrollListener.isLastPage) {
-            GlobalScope.launch {
-                delay(1000)
-                recyclerView.smoothScrollToPosition(0)
-            }
-
-        }
+        adapter.clearRecyclerView()
+        recyclerView.scrollToPosition(0)
         myScrollListener.isLastPage = false
     }
 
@@ -197,25 +196,13 @@ class AllMoviesActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickList
                         if (movies.isNotEmpty())
                             loadReceivedStoredData(movies)
                     } else
-                        Snackbar.make(
-                            this.layout_all_movies,
-                            "No Connection",
-                            Snackbar.LENGTH_INDEFINITE
-                        ).apply {
-                            setAction("Load Old Data") {
-                                myScrollListener.isLastPage = true
-                                recyclerView.smoothScrollToPosition(0)
-                                loadReceivedStoredData(movies)
-                            }
-                            setBackgroundTint(resources.getColor(R.color.snack_bar_bg))
-                        }.show()
+                        showLoadOfflineDataSnackBar(movies)
 
                     if (!isNetworkAvailable(this) && !comingFromNoInternet)
                         showNoConnectionSnackBar()
+
                 }
                 is Resource.Loading -> {
-                    Log.d("Genre", "Called")
-
                     if (!firstLoad)
                         showProgressBar()
                     else
@@ -223,6 +210,24 @@ class AllMoviesActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickList
                 }
             }
         }
+    }
+
+    private fun showLoadOfflineDataSnackBar(movies: List<Movie>) {
+        Snackbar.make(
+            this.layout_all_movies,
+            "No Connection",
+            Snackbar.LENGTH_INDEFINITE
+        ).apply {
+
+            setAction("Load Old Data") {
+                myScrollListener.isLastPage = true
+                adapter.clearRecyclerView()
+                recyclerView.scrollToPosition(0)
+                loadReceivedStoredData(movies)
+
+            }
+            setBackgroundTint(resources.getColor(R.color.snack_bar_bg))
+        }.show()
     }
 
     private fun loadReceivedStoredData(movies: List<Movie>) {
@@ -248,7 +253,7 @@ class AllMoviesActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickList
         })
     }
 
-    fun callCorrespondingMovieType(_type: Int) {
+    private fun callCorrespondingMovieType(_type: Int) {
         when (_type) {
             NOW_PLAYING -> movieViewModel.getNowPlayingMovies()
             POPULAR -> movieViewModel.getPopularMovies()
@@ -262,14 +267,11 @@ class AllMoviesActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickList
         super.onResume()
         if (!isNetworkAvailable(this))
             showNoConnectionSnackBar()
-        else if(comingFromNoInternet) {
+        else if (comingFromNoInternet) {
             refresh()
             snackbar.dismiss()
             comingFromNoInternet = false
         }
     }
-    override fun onDestroy() {
-        super.onDestroy()
-        snackbar.dismiss()
-    }
+
 }

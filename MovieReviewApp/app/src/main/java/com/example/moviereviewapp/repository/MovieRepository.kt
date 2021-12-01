@@ -12,44 +12,59 @@ import com.example.moviereviewapp.model.*
 import com.example.moviereviewapp.utils.Constants
 import com.example.moviereviewapp.utils.Constants.FAVORITE_MOVIES
 import com.example.moviereviewapp.utils.Constants.WATCHLIST_MOVIES
-import com.example.moviereviewapp.utils.Resource
 import networkBoundResource
 
 class MovieRepository(application: Application) : Repository() {
-    val mapper = MovieEntityMapper()
-    val movieService: MovieService = ServiceProvider.movieService
-    val moviesDao: MoviesDao
+    private val mapper = MovieEntityMapper()
+    private val movieService: MovieService = ServiceProvider.movieService
+    private val moviesDao: MoviesDao = MoviesAppDataBase.getInstance(application).movieDao
 
-    init {
-        moviesDao = MoviesAppDataBase.getInstance(application).movieDao
-    }
+    suspend fun getMoviesList(type: String, page: Int) =
 
-    suspend fun getMoviesList(type: String, page: Int): Resource<MovieListResponse> {
-
-        return networkBoundResource<MovieListResponse, Resource<MovieListResponse>>(
+        networkBoundResource(
             queryLocalData = {
                 fetchMoviesOfList(type, page)
             },
             fetch = { safeApiCall { movieService.getMoviesList(type, Constants.KEY, page) } },
-            saveFetchResult = { response, type ->
+            saveFetchResult = { response, _type ->
                 val movies = response.data?.results ?: listOf()
-                loadMoviesToDb(movies, type)
+                loadMoviesToDb(movies, _type)
             },
             typeOfList = type,
             queryCurrent = {
                 it.data!!
             }
         )
-    }
 
 
     suspend fun getMovieDetails(id: Int, sessionId: String) =
         safeApiCall { movieService.getMovieDetail(id, Constants.KEY, sessionId) }
 
+
     suspend fun searchMovie(searchQuery: String, searchMoviesPageCount: Int = 1) =
-        safeApiCall {
-            movieService.searchMovie(searchQuery, Constants.KEY, searchMoviesPageCount)
-        }
+        networkBoundResource(
+            queryLocalData = {
+                searchMoviesLocally(searchQuery)
+            },
+            fetch = {
+                safeApiCall {
+                    movieService.searchMovie(searchQuery, Constants.KEY, searchMoviesPageCount)
+                }
+            },
+            queryCurrent = {
+                it.data!!
+            },
+            saveFetchResult = { response, _ ->
+                moviesDao.insertMovies(
+                    mapper.getMovieEntityFromList(response.data?.results?.toList() ?: emptyList())
+                )
+            }
+        )
+
+    private fun searchMoviesLocally(searchQuery: String): MovieListResponse {
+        val list = mapper.getMovieFromMovieEntityList(moviesDao.searchMovies(searchQuery))
+        return MovieListResponse(1, list.toMutableList(), 1)
+    }
 
     suspend fun getFavoriteMovies(id: Int, sessionId: String, page: Int = 1) =
         networkBoundResource(
@@ -102,7 +117,8 @@ class MovieRepository(application: Application) : Repository() {
 
     private fun getMoviesOfGenre(id: Int): MovieListResponse {
         var list =
-            mapper.getMovieFromMovieEntityList(moviesDao.getAllMovies().sortedByDescending { it.addedTime })
+            mapper.getMovieFromMovieEntityList(
+                moviesDao.getAllMovies().sortedByDescending { it.addedTime })
         list = list.filter { it.genre_ids.contains(id) }
         return MovieListResponse(1, list.toMutableList(), 1)
     }
@@ -186,7 +202,7 @@ class MovieRepository(application: Application) : Repository() {
 
     private fun fetchMoviesOfList(type: String, page: Int): MovieListResponse {
         var totalPage = 1000
-        var movies: List<Movie>
+        val movies: List<Movie>
         try {
             movies = mapper.getSavedMovies(
                 moviesDao.getMoviesOfList(type).movies

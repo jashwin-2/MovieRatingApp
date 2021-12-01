@@ -3,6 +3,7 @@ package com.example.moviereviewapp.ui.activity
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import com.example.moviereviewapp.R
 import com.example.moviereviewapp.extensions.switch
 import com.example.moviereviewapp.ui.fragments.FavoriteFragment
@@ -21,7 +22,7 @@ class HomeActivity : AppCompatActivity() {
     private val favoriteFragment = FavoriteFragment()
     private val searchFragment = SearchFragment()
     var snackbar: Snackbar? = null
-    lateinit var networkLiveData : NetworkConnectionLiveData
+    lateinit var networkLiveData: NetworkConnectionLiveData
 
     private val watchListFragment = WatchListFragment()
     private var currentFragment = HOME_FRAGMENT
@@ -85,13 +86,16 @@ class HomeActivity : AppCompatActivity() {
         else if (currentFragment == SEARCH_FRAGMENT) {
             val searFragment = fragmentManager.findFragmentByTag(SEARCH_FRAGMENT)
 
-            if (searFragment != null && searFragment.childFragmentManager.backStackEntryCount > 1) {
+            if (searFragment != null && isSearchFragmentShowingResult(searFragment)) {
                 searFragment.childFragmentManager.popBackStack()
                 return
             }
         }
         goToHomeFragment()
     }
+
+    private fun isSearchFragmentShowingResult(searFragment: Fragment) =
+        searFragment.childFragmentManager.backStackEntryCount > 1
 
     private fun goToHomeFragment() {
         fragmentManager.switch(R.id.fragment_container, homeFragment, HOME_FRAGMENT)
@@ -117,28 +121,30 @@ class HomeActivity : AppCompatActivity() {
             Log.d("Snack", "$it")
             if (!it)
                 showNoConnectionSnackBar()
-            else if (it && comingFromNoInternet) {
-                snackbar?.dismiss()
-                val bottom = this.bottomNavigationView
-                Log.d("Snack", "green snack")
-                Snackbar.make(
-                    this.fragment_container,
-                    "Back Online",
-                    Snackbar.LENGTH_SHORT
-                ).apply {
-                    setBackgroundTint(resources.getColor(R.color.green))
-                    anchorView = bottom
-                }.show()
-            }
+            else if (it && comingFromNoInternet)
+                showBackOnlineSnackBar()
         }
     }
 
+    private fun showBackOnlineSnackBar() {
+        snackbar?.dismiss()
+        val bottom = this.bottomNavigationView
+        Snackbar.make(
+            this.fragment_container,
+            "Back Online",
+            Snackbar.LENGTH_SHORT
+        ).apply {
+            setBackgroundTint(resources.getColor(R.color.green))
+            anchorView = bottom
+        }.show()
+    }
+
+
     private fun showNoConnectionSnackBar() {
-        if (snackbar==null)
+        if (snackbar == null)
             initializeSnackBar()
         snackbar!!.show()
         comingFromNoInternet = true
-        Log.d("Network", "showNoConn")
     }
 
     override fun onAttachedToWindow() {
@@ -151,12 +157,10 @@ class HomeActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
-        Log.d("Snack", "onResu")
         super.onResume()
         networkLiveData = NetworkConnectionLiveData(this)
         if (isNetworkAvailable(this))
             comingFromNoInternet = false
-
         else
             showNoConnectionSnackBar()
         addNetworkStateObserver()
@@ -164,7 +168,6 @@ class HomeActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        Log.d("Snack", "onPause: ")
         networkLiveData.removeObservers(this)
     }
 

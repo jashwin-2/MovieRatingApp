@@ -10,10 +10,12 @@
 
     <ProgressBar
         android:id="@+id/progress_circular_movie_detail"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_marginTop="300dp"
-       android:layout_gravity="center_horizontal" />
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="20dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="480dp"
+        android:visibility="visible" />
 
     <include
         android:id="@+id/movie_detail_toolbar"
@@ -84,9 +86,9 @@
             <ImageView
                 android:id="@+id/iv_poster"
                 android:layout_width="125dp"
+                android:transitionName="iv_movie_poster"
                 android:layout_height="175dp"
                 android:layout_marginTop="264dp"
-                android:src="@drawable/ic_default_movie"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 

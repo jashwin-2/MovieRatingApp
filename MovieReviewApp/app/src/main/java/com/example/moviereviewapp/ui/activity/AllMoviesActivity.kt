@@ -2,7 +2,6 @@ package com.example.moviereviewapp.ui.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -15,22 +14,16 @@ import com.example.moviereviewapp.R
 import com.example.moviereviewapp.model.Movie
 import com.example.moviereviewapp.model.MovieListResponse
 import com.example.moviereviewapp.ui.adapter.AllMovieListAdapter
-import com.example.moviereviewapp.ui.adapter.MovieListAdapter
+import com.example.moviereviewapp.ui.adapter.MovieListOnClickListener
 import com.example.moviereviewapp.ui.fragments.HomeFragment
 import com.example.moviereviewapp.ui.fragments.SearchHomeFragment.Companion.GENRE_ID
 import com.example.moviereviewapp.ui.viewModel.MovieViewModel
-import com.example.moviereviewapp.utils.MyScrollListener
-import com.example.moviereviewapp.utils.NetworkConnectionLiveData
-import com.example.moviereviewapp.utils.Resource
-import com.example.moviereviewapp.utils.isNetworkAvailable
+import com.example.moviereviewapp.utils.*
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_all_movies.*
 import kotlinx.android.synthetic.main.toolbar.view.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
-class AllMoviesActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickListener {
+class AllMoviesActivity : AppCompatActivity(), MovieListOnClickListener {
     lateinit var movieViewModel: MovieViewModel
     lateinit var adapter: AllMovieListAdapter
     lateinit var snackbar: Snackbar
@@ -247,11 +240,6 @@ class AllMoviesActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickList
         }
     }
 
-    override fun onClick(movie: Movie) {
-        startActivity(Intent(this, MovieDetailActivity::class.java).apply {
-            putExtra(HomeFragment.MOVIE_ID, movie.id)
-        })
-    }
 
     private fun callCorrespondingMovieType(_type: Int) {
         when (_type) {
@@ -272,6 +260,10 @@ class AllMoviesActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickList
             snackbar.dismiss()
             comingFromNoInternet = false
         }
+    }
+
+    override fun onClick(movie: Movie, holder: AllMovieListAdapter.ViewHolder) {
+       startMovieDetailActivity(this , movie , holder.poster)
     }
 
 }

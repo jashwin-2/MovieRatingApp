@@ -2,16 +2,27 @@ package com.example.moviereviewapp.ui.activity
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.transition.ChangeBounds
+import android.transition.ChangeImageTransform
+import android.transition.TransitionSet
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.transition.doOnEnd
+import androidx.core.view.isVisible
 import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.Target
 import com.example.moviereviewapp.R
 import com.example.moviereviewapp.extensions.loadImage
 import com.example.moviereviewapp.model.Movie
@@ -38,6 +49,7 @@ import kotlinx.android.synthetic.main.search_toolbar.view.*
 import kotlinx.android.synthetic.main.similar_movies_layout.*
 import kotlinx.android.synthetic.main.toolbar.view.*
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -52,17 +64,32 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
     lateinit var movieViewModel: MovieViewModel
     lateinit var movie: MovieFullDetail
     lateinit var toolbar: Toolbar
+
+    val posterUrl by lazy {
+        Constants.IMAGE_BASE_URL + intent.getStringExtra(POSTER_PATH)
+    }
     var sessionId: String? = null
     var accountId = 0
 
     companion object {
         const val FAVORITE = 1
         const val WATCHLIST = 2
+        const val POSTER_PATH = "poster_path"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        postponeEnterTransition()
         setContentView(R.layout.activity_movie_detail)
+        loadImage(posterUrl) {
+            startPostponedEnterTransition()
+        }
+        window.sharedElementEnterTransition = TransitionSet()
+            .addTransition(ChangeImageTransform())
+            .addTransition(ChangeBounds())
+            .apply {
+                doOnEnd { loadImage(posterUrl) }
+            }
 
         // movieViewModel = ViewModelProvider(this).get(MovieViewModel::class.java)
         ViewModelProvider(
@@ -73,7 +100,7 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
         }
         toolbar = movie_detail_toolbar.toolbar_custom
         movieDetailLayout = this.findViewById(R.id.nestedScrollView2)
-        movieDetailLayout.visibility = View.GONE
+        movieDetailLayout.visibility = View.VISIBLE
         setToolBar("Movie Name")
         setObserver()
 
@@ -83,6 +110,7 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
             accountId = fetchAccId()
         }
 
+        this.iv_poster.transitionName = "iv_movie_poster${movieId}"
         initializeSnackBar()
         addNetworkStateObserver()
         movieViewModel.getMovieDetail(movieId, sessionId!!)
@@ -93,14 +121,17 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
         movieViewModel.movieDetails.observe(this) {
             when (it) {
                 is Resource.Success -> {
-                    progress_circular_movie_detail.visibility = View.GONE
                     movie = it.data!!
+                    MainScope().launch {
+                        progress_circular_movie_detail.isVisible = true
+                        delay(500)
+                        setActivity()
+                        progress_circular_movie_detail.isVisible = false
+                    }
                     setToolBar(movie.title)
-                    setActivity()
-                    movieDetailLayout.visibility = View.VISIBLE
                 }
                 is Resource.Loading -> {
-                    progress_circular_movie_detail.visibility = View.VISIBLE
+                    // progress_circular_movie_detail.visibility = View.VISIBLE
                 }
                 is Resource.Error -> {
                     if (!isNetworkAvailable(this) && !comingFromNoInternet)
@@ -125,15 +156,15 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
     }
 
     private fun setActivity() {
-        loadPoster()
-        setGenreGroup()
-        initializeTrailer()
-        setCastRv()
-        setSimilarMoviesRv()
-        setProductionCompanyRv()
-        setFavoriteButton()
-        setWatchListButton()
-        setRatingListener()
+       loadPoster()
+       setGenreGroup()
+       initializeTrailer()
+       setCastRv()
+       setSimilarMoviesRv()
+       setProductionCompanyRv()
+       setFavoriteButton()
+       setWatchListButton()
+       setRatingListener()
         val fragment = RatingFragment(this)
 
         iv_rate_the_movie.setOnClickListener {
@@ -288,7 +319,7 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
         val time = if (generes.size >= 4) 4 else generes.size
         var i = 0
 
-        if (cg_geners.childCount !=0 )
+        if (cg_geners.childCount != 0)
             return
         while (i < time) {
             Chip(this).apply {
@@ -318,8 +349,7 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
 
     @SuppressLint("SetTextI18n")
     private fun loadPoster() {
-        val url = Constants.IMAGE_BASE_URL + movie.poster_path
-        loadImage(url, iv_poster, R.drawable.ic_default_profile)
+
 
         tv_rating.text = "${movie.vote_average} / 10"
         tv_overview.text = movie.overview
@@ -353,11 +383,6 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
 
     }
 
-    override fun onClick(movie: Movie) {
-        startActivity(Intent(this, MovieDetailActivity::class.java).apply {
-            putExtra(MOVIE_ID, movie.id)
-        })
-    }
 
     override fun onRateBtnClicked(rating: Double) {
         if (isNetworkAvailable(this))
@@ -417,4 +442,41 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
         }
     }
 
+    private fun loadImage(url: String, onLoadingFinished: () -> Unit = {}) {
+        val listener = object : RequestListener<Drawable> {
+            override fun onLoadFailed(
+                e: GlideException?,
+                model: Any?,
+                target: Target<Drawable>?,
+                isFirstResource: Boolean
+            ): Boolean {
+                onLoadingFinished()
+                return false
+            }
+
+            override fun onResourceReady(
+                resource: Drawable?,
+                model: Any?,
+                target: Target<Drawable>?,
+                dataSource: DataSource?,
+                isFirstResource: Boolean
+            ): Boolean {
+                onLoadingFinished()
+                return false
+            }
+        }
+        val requestOptions = RequestOptions.placeholderOf(R.drawable.ic_default_movie)
+            .dontTransform()
+            .onlyRetrieveFromCache(true)
+        Glide.with(this)
+            .load(url)
+            .listener(listener)
+            .apply(requestOptions)
+
+            .into(iv_poster)
+    }
+
+    override fun onClick(movie: Movie, holder: MovieListAdapter.MovieHolder) {
+        startMovieDetailActivity(this , movie ,holder.poster)
+    }
 }

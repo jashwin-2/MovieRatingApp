@@ -26,6 +26,7 @@
             android:id="@+id/moviePoster"
             android:layout_width="150dp"
             android:layout_height="189dp"
+            android:transitionName="iv_movie_poster"
             android:background="@color/light_gray"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_default_movie"

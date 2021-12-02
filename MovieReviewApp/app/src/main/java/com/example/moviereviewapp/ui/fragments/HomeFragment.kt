@@ -23,13 +23,13 @@ import com.example.moviereviewapp.ui.activity.AllMoviesActivity.Companion.SELECT
 import com.example.moviereviewapp.ui.activity.AllMoviesActivity.Companion.SELECTED_TYPE
 import com.example.moviereviewapp.ui.activity.AllMoviesActivity.Companion.TOP_RATED
 import com.example.moviereviewapp.ui.activity.AllMoviesActivity.Companion.UPCOMING
-import com.example.moviereviewapp.ui.activity.MovieDetailActivity
 import com.example.moviereviewapp.ui.activity.ProfileActivity
 import com.example.moviereviewapp.ui.adapter.MovieListAdapter
 import com.example.moviereviewapp.ui.viewModel.MovieViewModel
 import com.example.moviereviewapp.utils.NetworkConnectionLiveData
 import com.example.moviereviewapp.utils.Resource
 import com.example.moviereviewapp.utils.SessionManager
+import com.example.moviereviewapp.utils.startMovieDetailActivity
 import com.facebook.shimmer.ShimmerFrameLayout
 import kotlinx.android.synthetic.main.fragment_home.view.*
 import kotlinx.android.synthetic.main.movie_list_layout.view.*
@@ -94,12 +94,12 @@ class HomeFragment : Fragment(R.layout.fragment_home), MovieListAdapter.MovieOnC
         addNetworkStateObserver()
 
         // shared element animation
-        setClickListnerToProfileIv(view)
+        setClickListenerToProfileIv(view)
 
         return view
     }
 
-    private fun setClickListnerToProfileIv(view: View) {
+    private fun setClickListenerToProfileIv(view: View) {
         view.iv_profile.setOnClickListener {
             Intent(activity, ProfileActivity::class.java).apply {
                 startActivity(
@@ -278,10 +278,9 @@ class HomeFragment : Fragment(R.layout.fragment_home), MovieListAdapter.MovieOnC
         }
     }
 
-    override fun onClick(movie: Movie) {
-        startActivity(Intent(activity, MovieDetailActivity::class.java).apply {
-            putExtra(MOVIE_ID, movie.id)
-        })
+    override fun onClick(movie: Movie, holder: MovieListAdapter.MovieHolder) : Unit {
+        startMovieDetailActivity(requireActivity(), movie, holder.poster)
+
     }
 
     private fun addNetworkStateObserver() {
@@ -289,7 +288,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), MovieListAdapter.MovieOnC
         NetworkConnectionLiveData(activity as Context).observe(viewLifecycleOwner) {
             if (it)
                 movieViewModel.fetchAll()
-
 
         }
     }

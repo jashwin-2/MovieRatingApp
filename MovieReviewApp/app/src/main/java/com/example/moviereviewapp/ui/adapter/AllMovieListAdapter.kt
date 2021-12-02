@@ -2,7 +2,6 @@ package com.example.moviereviewapp.ui.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,15 +15,14 @@ import com.example.moviereviewapp.ui.view.AppTextView
 import com.example.moviereviewapp.ui.view.AppTextViewBold
 import com.example.moviereviewapp.utils.Constants
 import com.example.moviereviewapp.utils.MyDiffUtil
-import kotlin.math.log
 
 class AllMovieListAdapter(
     val context: Context,
-    private val clickListener: MovieListAdapter.MovieOnClickListener
+    private val clickListener: MovieListOnClickListener
 ) : RecyclerView.Adapter<AllMovieListAdapter.ViewHolder>() {
     var oldMovies: List<Movie> = listOf()
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val poster: ImageView = view.findViewById(R.id.poster_av)
         val title: AppTextViewBold = view.findViewById(R.id.tv_title_av)
         val overView: AppTextView = view.findViewById(R.id.tv_overview)
@@ -50,7 +48,7 @@ class AllMovieListAdapter(
             .into(holder.poster)
 
         holder.layout.setOnClickListener {
-            clickListener.onClick(movie)
+            clickListener.onClick(movie , holder)
         }
         holder.overView.text = movie.overview
         holder.rating.text = movie.vote_average.toString() + " / 10"
@@ -74,4 +72,8 @@ class AllMovieListAdapter(
             oldMovies = emptyList()
         notifyDataSetChanged()
     }
+}
+
+interface MovieListOnClickListener{
+    fun onClick(movie: Movie, holder: AllMovieListAdapter.ViewHolder)
 }

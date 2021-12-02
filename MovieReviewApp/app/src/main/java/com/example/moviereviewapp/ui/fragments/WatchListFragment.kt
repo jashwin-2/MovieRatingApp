@@ -16,16 +16,17 @@ import com.example.moviereviewapp.model.Movie
 import com.example.moviereviewapp.ui.activity.MovieDetailActivity
 import com.example.moviereviewapp.ui.activity.ProfileActivity
 import com.example.moviereviewapp.ui.adapter.AllMovieListAdapter
-import com.example.moviereviewapp.ui.adapter.MovieListAdapter
+import com.example.moviereviewapp.ui.adapter.MovieListOnClickListener
 import com.example.moviereviewapp.ui.viewModel.MovieViewModel
 import com.example.moviereviewapp.utils.NetworkConnectionLiveData
 import com.example.moviereviewapp.utils.Resource
 import com.example.moviereviewapp.utils.SessionManager
+import com.example.moviereviewapp.utils.startMovieDetailActivity
 import com.facebook.shimmer.ShimmerFrameLayout
 import kotlinx.android.synthetic.main.fragment_watchlist.view.*
 
 class WatchListFragment : Fragment(R.layout.fragment_favorite),
-    MovieListAdapter.MovieOnClickListener {
+    MovieListOnClickListener {
 
     private lateinit var shimmerFrameLayout: ShimmerFrameLayout
     lateinit var watchListRv: RecyclerView
@@ -126,11 +127,6 @@ class WatchListFragment : Fragment(R.layout.fragment_favorite),
             LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
     }
 
-    override fun onClick(movie: Movie) {
-        startActivity(Intent(activity, MovieDetailActivity::class.java).apply {
-            putExtra(HomeFragment.MOVIE_ID, movie.id)
-        })
-    }
 
     private fun addNetworkStateObserver() {
         NetworkConnectionLiveData(activity as Context).observe(viewLifecycleOwner) {
@@ -138,5 +134,9 @@ class WatchListFragment : Fragment(R.layout.fragment_favorite),
                 movieViewModel.getWatchListMovies(accountId, sessionId)
         }
 
+    }
+
+    override fun onClick(movie: Movie, holder: AllMovieListAdapter.ViewHolder) {
+        startMovieDetailActivity(requireActivity() , movie ,holder.poster)
     }
 }

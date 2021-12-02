@@ -50,7 +50,7 @@ class MovieListAdapter(
             .placeholder(R.drawable.ic_default_movie)
             .into(holder.poster)
         holder.layout.setOnClickListener {
-            clickListener.onClick(oldMovieList[position])
+            clickListener.onClick(oldMovieList[position] , holder)
         }
 
     }
@@ -65,6 +65,6 @@ class MovieListAdapter(
     }
 
     interface MovieOnClickListener {
-        fun onClick(movie: Movie)
+        fun onClick(movie: Movie, holder: MovieHolder)
     }
 }

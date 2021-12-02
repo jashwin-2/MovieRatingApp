@@ -18,13 +18,10 @@ import com.example.moviereviewapp.model.MovieListResponse
 import com.example.moviereviewapp.ui.activity.AllMoviesActivity
 import com.example.moviereviewapp.ui.activity.MovieDetailActivity
 import com.example.moviereviewapp.ui.adapter.AllMovieListAdapter
-import com.example.moviereviewapp.ui.adapter.MovieListAdapter
+import com.example.moviereviewapp.ui.adapter.MovieListOnClickListener
 import com.example.moviereviewapp.ui.viewModel.MovieViewModel
 import com.example.moviereviewapp.ui.viewModel.SharedViewModel
-import com.example.moviereviewapp.utils.MyScrollListener
-import com.example.moviereviewapp.utils.NetworkConnectionLiveData
-import com.example.moviereviewapp.utils.Resource
-import com.example.moviereviewapp.utils.isNetworkAvailable
+import com.example.moviereviewapp.utils.*
 import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_home.*
@@ -32,7 +29,7 @@ import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.android.synthetic.main.fragment_search_result.view.*
 
 class SearchResultFragment : Fragment(R.layout.fragment_search_result),
-    MovieListAdapter.MovieOnClickListener {
+    MovieListOnClickListener {
 
     private var currentNetworkState = true
     var firstPage = true
@@ -208,11 +205,7 @@ class SearchResultFragment : Fragment(R.layout.fragment_search_result),
         myScrollListener.isLoading = true
     }
 
-    override fun onClick(movie: Movie) {
-        startActivity(Intent(activity, MovieDetailActivity::class.java).apply {
-            putExtra(HomeFragment.MOVIE_ID, movie.id)
-        })
-    }
+
 
     private fun addNetworkStateObserver() {
         NetworkConnectionLiveData(activity as Context).observe(viewLifecycleOwner) {
@@ -232,5 +225,9 @@ class SearchResultFragment : Fragment(R.layout.fragment_search_result),
 
         }
 
+    }
+
+    override fun onClick(movie: Movie, holder: AllMovieListAdapter.ViewHolder) {
+        startMovieDetailActivity(requireActivity() , movie ,holder.poster)
     }
 }

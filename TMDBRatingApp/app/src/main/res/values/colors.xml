@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="light_gray">#AEABAB</color>
+    <color name="tmdb_primary">#0D253F</color>
+    <color name="app_accent">#615EB9</color>
+    <color name="secondary_text">#A9222222</color>
+    <color name="primary_text">@color/black</color>
+    <color name="tmdb_secondary">#16336E</color>
+    <color name="color_primary">#16416E</color>
+    <color name="tmdb_green">#90CEA1</color>
+    <color name="light_blue">#0883BD</color>
+    <color name="movie_holder_bg">#BFE3E5F8</color>
+    <color name="text_field_bg">@color/white</color>
+    <color name="list_layout_bg">#D5FBF9F9</color>
+    <color name="grey_layout_bg">#e9ebf0</color>
+    <color name="snack_bar_bg">#F6675D</color>
+    <color name="green">#0BAF12</color>
+    <color name="production_bg">#ECEAEA</color>
+    <color name="shimmer_placeholder">#dddddd</color>
+    <color name="bottom_nav_view_bg">@color/white</color>
+    <color name="icon_bg">@color/secondary_text</color>
+    <color name="tmdb_btn_start">#90cea1</color>
+    <color name="tmdb_btn_end">#01b4e4</color>
+</resources>

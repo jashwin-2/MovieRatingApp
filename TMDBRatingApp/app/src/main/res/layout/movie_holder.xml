@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    android:id="@+id/layout_movie_holder"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:foreground="?attr/selectableItemBackground"
+    android:layout_height="wrap_content"
+    android:elevation="20dp"
+    android:layout_marginTop="3dp"
+    android:layout_marginBottom="3dp"
+    android:layout_marginRight="5dp"
+    app:cardCornerRadius="15dp"
+>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="150dp"
+        android:layout_height="275dp"
+        android:background="@color/movie_holder_bg"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="-21dp"
+        tools:layout_editor_absoluteY="-19dp">
+
+        <ImageView
+            android:id="@+id/moviePoster"
+            android:layout_width="150dp"
+            android:layout_height="189dp"
+            android:transitionName="iv_movie_poster"
+            android:background="@color/light_gray"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_default_movie"
+            app:layout_constraintBottom_toTopOf="@+id/rating"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <com.example.tmdbRatingApp.ui.view.AppTextView
+            android:id="@+id/movieName"
+            android:layout_width="151dp"
+            android:layout_height="67dp"
+            android:layout_marginStart="3dp"
+            android:ellipsize="end"
+            android:gravity="clip_horizontal"
+            android:lines="2"
+            android:padding="8dp"
+            android:text="Movie Name"
+            android:textColor="@color/tmdb_secondary"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.75"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/rating"
+            app:layout_constraintVertical_bias="1.0" />
+
+        <com.example.tmdbRatingApp.ui.view.AppTextView
+            android:id="@+id/rating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginBottom="64dp"
+            android:paddingTop="7dp"
+            android:text="rating"
+            android:textColor="@color/tmdb_secondary"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.17"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <ImageView
+            android:id="@+id/imageView3"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginStart="3dp"
+            android:layout_marginBottom="60dp"
+            android:paddingTop="10dp"
+            android:src="@drawable/ic_rating_star"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/rating"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <com.example.tmdbRatingApp.ui.view.AppTextView
+            android:id="@+id/release_year"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="5dp"
+            android:paddingStart="5dp"
+            android:paddingTop="2dp"
+            android:text="year"
+            android:textColor="@color/light_gray"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@+id/rating"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.728" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

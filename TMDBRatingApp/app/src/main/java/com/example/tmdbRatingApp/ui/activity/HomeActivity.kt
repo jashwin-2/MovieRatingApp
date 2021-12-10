@@ -1,5 +1,6 @@
 package com.example.tmdbRatingApp.ui.activity
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -39,6 +40,7 @@ class HomeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
         setNavigationListener()
+
         if (savedInstanceState == null)
             fragmentManager.switch(R.id.fragment_container, homeFragment, HOME_FRAGMENT)
     }

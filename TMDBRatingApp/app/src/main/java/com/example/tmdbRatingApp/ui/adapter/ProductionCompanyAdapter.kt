@@ -29,7 +29,7 @@ class ProductionCompanyAdapter(val context: Context, private val companyList: Li
 
     override fun onBindViewHolder(holder: CompanyHolder, position: Int) {
         val url = Constants.IMAGE_BASE_URL + companyList[position].logo_path
-        (context as AppCompatActivity).loadImage(url, holder.poster, R.drawable.ic_default_profile)
+        (context as AppCompatActivity).loadImage(url, holder.poster, R.drawable.ic_default_company)
         holder.companyName.text = companyList[position].name
     }
 

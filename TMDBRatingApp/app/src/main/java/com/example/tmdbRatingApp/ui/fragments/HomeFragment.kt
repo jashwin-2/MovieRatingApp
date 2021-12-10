@@ -85,7 +85,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), MovieListAdapter.MovieOnC
         )[MovieViewModel::class.java].also {
             movieViewModel = it
         }
-
         SessionManager(requireContext()).apply {
             view.tv_hello.text = "Hello ${fetchUserName()}"
         }
@@ -223,7 +222,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), MovieListAdapter.MovieOnC
         when (resource) {
             is Resource.Success -> {
                 setProgressBarStatus(adapter.type, false)
-                resource.data?.let { it1 -> adapter.setMoviesList((it1.results).toList()) }
+                resource.data?.let { it1 -> adapter.setMoviesList((it1.results.subList(0,20)).toList()) }
             }
             is Resource.Error -> {
                 val list = resource.data?.results
@@ -280,7 +279,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), MovieListAdapter.MovieOnC
 
     override fun onClick(movie: Movie, holder: MovieListAdapter.MovieHolder) : Unit {
         startMovieDetailActivity(requireActivity(), movie, holder.poster)
-
     }
 
     private fun addNetworkStateObserver() {

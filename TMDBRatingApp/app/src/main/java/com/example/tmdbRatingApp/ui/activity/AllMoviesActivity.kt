@@ -21,7 +21,7 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_all_movies.*
 import kotlinx.android.synthetic.main.toolbar.view.*
 
-class AllMoviesActivity : AppCompatActivity(), MovieListOnClickListener {
+class   AllMoviesActivity : AppCompatActivity(), MovieListOnClickListener {
     lateinit var movieViewModel: MovieViewModel
     lateinit var adapter: AllMovieListAdapter
     lateinit var snackbar: Snackbar

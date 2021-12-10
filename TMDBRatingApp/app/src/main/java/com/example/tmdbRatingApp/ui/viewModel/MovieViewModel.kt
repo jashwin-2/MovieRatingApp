@@ -25,6 +25,10 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
     val favoriteMovies: MutableLiveData<Resource<MovieListResponse?>> = MutableLiveData()
     val watchListMovies: MutableLiveData<Resource<MovieListResponse?>> = MutableLiveData()
 
+    val movieReviews: MutableLiveData<Resource<ReviewResponse>> = MutableLiveData()
+    var reviewPageCount = 1
+    var reviewResponse = ReviewResponse()
+
     val genreMovieList: MutableLiveData<Resource<MovieListResponse>> = MutableLiveData()
     var genrePageCount = 1
     val genreMovieResponse = MovieResponse()
@@ -50,18 +54,19 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
     var nowPlayingMoviesPageCount = 1
     var nowPlayingMovieResponse = MovieResponse()
 
-    init {
-        fetchAll()
-    }
 
-     fun fetchAll() {
+    fun fetchAll() {
         getAllGenres()
         getPopularMovies()
         getNowPlayingMovies()
         getUpComingMovies()
         getTopRatedMovies()
+
     }
 
+    init {
+        fetchAll()
+    }
 
     var allGenres: MutableLiveData<List<Genre>> = MutableLiveData()
 
@@ -80,7 +85,7 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
                 POPULAR_MOVIES,
                 popularMoviesPageCount
             )
-            if (response is Resource.Success ) {
+            if (response is Resource.Success) {
                 popularMoviesPageCount++
                 popularMovies.postValue(handlePagination(response, popularMovieResponse))
             } else
@@ -114,7 +119,7 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
                 TOP_RATED_MOVIES,
                 topRatedMoviesPageCount
             )
-            if (response is Resource.Success ) {
+            if (response is Resource.Success) {
                 topRatedMoviesPageCount++
                 topRatedMovies.postValue(handlePagination(response, topRatedMovieResponse))
             } else
@@ -179,7 +184,8 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
     fun getMoviesListByGenre(id: Int) {
         viewModelScope.launch {
             genreMovieList.postValue(Resource.Loading())
-            val response  : Resource<MovieListResponse> = movieRepository.getMoviesByGenre(id, genrePageCount)
+            val response: Resource<MovieListResponse> =
+                movieRepository.getMoviesByGenre(id, genrePageCount)
             if (response is Resource.Success) {
                 genrePageCount++
                 genreMovieList.postValue(handlePagination(response, genreMovieResponse))
@@ -236,6 +242,26 @@ class MovieViewModel(application: Application) : AndroidViewModel(application) {
             oldMovies.addAll(newMovies!!)
         }
         return Resource.Success(previousResponse.movieResponse!!)
+    }
+
+    fun getMovieReviews(movieId: Int) {
+        viewModelScope.launch {
+            movieReviews.postValue(Resource.Loading())
+            val response = movieRepository.getMovieReviews(movieId, reviewPageCount)
+            if (response is Resource.Success) {
+                reviewPageCount++
+                if (reviewResponse.results.isEmpty())
+                    reviewResponse = response.data!!
+                else {
+                    val oldReviews = reviewResponse.results
+                    val newReviews = response.data?.results
+                    oldReviews.addAll(newReviews!!)
+                }
+                movieReviews.postValue(Resource.Success(reviewResponse))
+            } else
+                movieReviews.postValue(response)
+
+        }
     }
 
     fun rateTheMovie(movieId: Int, sessionId: String, rating: Double) {

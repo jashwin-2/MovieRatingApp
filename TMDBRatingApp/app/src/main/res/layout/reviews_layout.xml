@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tool="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/rounded_white_bg"
+    android:orientation="vertical">
+
+    <com.example.tmdbRatingApp.ui.view.AppTextViewBold
+        android:id="@+id/tittle_reviews"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"
+        android:text="User Reviews"
+        android:textColor="@color/tmdb_secondary"
+        android:textSize="18sp" />
+
+    <com.example.tmdbRatingApp.ui.view.AppTextViewBold
+        android:id="@+id/tv_no_reviews"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tittle_reviews"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="37dp"
+        android:layout_marginBottom="16dp"
+        android:padding="6dp"
+        android:visibility="gone"
+        android:text="We don't have any reviews for this movie"
+        android:textAlignment="center"
+        android:textColor="@color/tmdb_secondary"
+        android:textSize="15sp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_reviews_movie_det"
+        android:layout_marginStart="1dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tittle_reviews"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="8dp"
+        android:clipToPadding="false"
+        android:paddingStart="10dp" />
+
+</RelativeLayout>

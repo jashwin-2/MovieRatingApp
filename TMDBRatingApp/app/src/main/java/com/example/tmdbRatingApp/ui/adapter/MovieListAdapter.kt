@@ -5,12 +5,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmdbRatingApp.R
 import com.example.tmdbRatingApp.model.Movie
 import com.example.tmdbRatingApp.ui.view.AppTextView
 import com.example.tmdbRatingApp.utils.Constants
+import com.example.tmdbRatingApp.utils.MyDiffUtil
 
 class MovieListAdapter(
     val context: Context,
@@ -43,14 +45,15 @@ class MovieListAdapter(
         val movie = oldMovieList[position]
         holder.title.text = movie.title
         holder.rating.text = movie.vote_average.toString()
-        holder.releaserYear.text = movie.release_date?.slice(0..3) ?: "not released"
+
+           holder.releaserYear.text = if (!movie.release_date.isNullOrBlank()) movie.release_date.slice(0..3) else "not released"
         val url = Constants.IMAGE_BASE_URL + movie.poster_path
         Glide.with(context)
             .load(url)
             .placeholder(R.drawable.ic_default_movie)
             .into(holder.poster)
         holder.layout.setOnClickListener {
-            clickListener.onClick(oldMovieList[position] , holder)
+            clickListener.onClick(oldMovieList[position], holder)
         }
 
     }
@@ -59,9 +62,11 @@ class MovieListAdapter(
         return oldMovieList.size
     }
 
-    fun setMoviesList(list: List<Movie>) {
-        oldMovieList = list
-        notifyDataSetChanged()
+    fun setMoviesList(newList: List<Movie>) {
+        val myDiff = MyDiffUtil(oldMovieList, newList)
+        val diffResult = DiffUtil.calculateDiff(myDiff)
+        oldMovieList = newList
+        diffResult.dispatchUpdatesTo(this)
     }
 
     interface MovieOnClickListener {

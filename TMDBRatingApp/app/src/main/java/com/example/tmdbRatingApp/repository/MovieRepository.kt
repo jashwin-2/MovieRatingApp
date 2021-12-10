@@ -36,6 +36,8 @@ class MovieRepository(application: Application) : Repository() {
             }
         )
 
+    suspend fun getMovieReviews(movieId : Int , page : Int) =
+        safeApiCall { movieService.getMovieReviews(movieId,page,Constants.KEY) }
 
     suspend fun getMovieDetails(id: Int, sessionId: String) =
         safeApiCall { movieService.getMovieDetail(id, Constants.KEY, sessionId) }
@@ -222,6 +224,7 @@ class MovieRepository(application: Application) : Repository() {
 
         return MovieListResponse(page, newMoviesList, totalPage)
     }
+
 
 }
 

@@ -83,5 +83,13 @@ interface MovieService {
         @Query("language") lang: String = "language=en-US"
         ) : Response<GenreListResponse>
 
+    @GET("3/movie/{movie_id}/reviews")
+    suspend fun getMovieReviews(
+        @Path("movie_id") movieId : Int,
+        @Query("page") genrePageCount: Int,
+        @Query("api_key") key : String,
+        @Query("language") language: String = "en-US"
+    ) : Response<ReviewResponse>
+
 }
 

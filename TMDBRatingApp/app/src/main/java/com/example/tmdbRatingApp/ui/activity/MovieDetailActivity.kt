@@ -27,6 +27,8 @@ import com.example.tmdbRatingApp.R
 import com.example.tmdbRatingApp.extensions.loadImage
 import com.example.tmdbRatingApp.model.Movie
 import com.example.tmdbRatingApp.model.MovieFullDetail
+import com.example.tmdbRatingApp.model.Review
+import com.example.tmdbRatingApp.ui.adapter.AllReviewAdapter
 import com.example.tmdbRatingApp.ui.adapter.CastAdapter
 import com.example.tmdbRatingApp.ui.adapter.MovieListAdapter
 import com.example.tmdbRatingApp.ui.adapter.ProductionCompanyAdapter
@@ -45,6 +47,8 @@ import kotlinx.android.synthetic.main.activity_all_movies.*
 import kotlinx.android.synthetic.main.activity_movie_detail.*
 import kotlinx.android.synthetic.main.cast_layout.*
 import kotlinx.android.synthetic.main.production_company_layout.*
+import kotlinx.android.synthetic.main.reviews_layout.*
+import kotlinx.android.synthetic.main.reviews_layout.view.*
 import kotlinx.android.synthetic.main.search_toolbar.view.*
 import kotlinx.android.synthetic.main.similar_movies_layout.*
 import kotlinx.android.synthetic.main.toolbar.view.*
@@ -63,6 +67,8 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
     lateinit var movieViewModel: MovieViewModel
     lateinit var movie: MovieFullDetail
     lateinit var toolbar: Toolbar
+    lateinit var reviewAdapter: AllReviewAdapter
+    var reviews: List<Review> = listOf()
 
     val posterUrl by lazy {
         Constants.IMAGE_BASE_URL + intent.getStringExtra(POSTER_PATH)
@@ -113,6 +119,8 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
         initializeSnackBar()
         addNetworkStateObserver()
         movieViewModel.getMovieDetail(movieId, sessionId!!)
+        if (movieViewModel.reviewPageCount == 1)
+            movieViewModel.getMovieReviews(movieId)
 
     }
 
@@ -145,6 +153,12 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
                 }
             }
         }
+
+        movieViewModel.movieReviews.observe(this) {
+            if (it is Resource.Success) {
+                reviews = it.data?.results ?: listOf()
+            }
+        }
     }
 
     private fun setToolBar(newTitle: String?) = toolbar.apply {
@@ -155,15 +169,16 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
     }
 
     private fun setActivity() {
-       loadPoster()
-       setGenreGroup()
-       initializeTrailer()
-       setCastRv()
-       setSimilarMoviesRv()
-       setProductionCompanyRv()
-       setFavoriteButton()
-       setWatchListButton()
-       setRatingListener()
+        loadPoster()
+        setGenreGroup()
+        initializeTrailer()
+        setCastRv()
+        setSimilarMoviesRv()
+        setProductionCompanyRv()
+        setFavoriteButton()
+        setWatchListButton()
+        setRatingListener()
+        setReviewsRv()
         val fragment = RatingFragment(this)
 
         iv_rate_the_movie.setOnClickListener {
@@ -175,6 +190,29 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
 
 
     }
+
+    private fun setReviewsRv() {
+        val recyclerView = this.layout_reviews.rv_reviews_movie_det
+        if (reviews.isEmpty()){
+            recyclerView.visibility = View.GONE
+            this.tv_no_reviews.visibility = View.VISIBLE
+        }
+        recyclerView.apply {
+            layoutManager =
+                LinearLayoutManager(this@MovieDetailActivity, LinearLayoutManager.HORIZONTAL, false)
+            AllReviewAdapter(
+                this@MovieDetailActivity,
+                AllReviewAdapter.MOVIE_DETAIL_HOLDER ,
+                movieId
+            ).apply {
+                reviewAdapter = this
+                adapter = this
+                setReviews(reviews)
+            }
+        }
+
+    }
+
 
     private fun setRatingListener() {
         movieViewModel.rateMovieResponse.observe(this) {
@@ -283,6 +321,14 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
     }
 
     private fun setSimilarMoviesRv() {
+
+        if(movie.recommendations.results.isEmpty())
+        {
+            this.layout_no_movies_found.visibility = View.VISIBLE
+            rv_similar_movies.visibility = View.GONE
+            return
+        }
+
         LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false).apply {
             rv_similar_movies.layoutManager = this
         }
@@ -476,6 +522,6 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
     }
 
     override fun onClick(movie: Movie, holder: MovieListAdapter.MovieHolder) {
-        startMovieDetailActivity(this , movie ,holder.poster)
+        startMovieDetailActivity(this, movie, holder.poster)
     }
 }

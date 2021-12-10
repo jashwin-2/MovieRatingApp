@@ -94,11 +94,36 @@
         <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/MovieReviewApp/app/src/main/res/layout/shimmer_layout.xml" value="0.1503623188405797" />
         <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/MovieReviewApp/app/src/main/res/layout/toolbar.xml" value="0.1503623188405797" />
         <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/MovieReviewApp/app/src/main/res/layout/user_detail_layout.xml" value="0.1503623188405797" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/drawable/ic_default_company.xml" value="0.15833333333333333" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/drawable/ic_person_24.xml" value="0.1824074074074074" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/drawable/ic_watchlist_grey.xml" value="0.18796296296296297" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/drawable/ic_white_star.xml" value="0.18796296296296297" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/drawable/rounded_avatar_bg.xml" value="0.1824074074074074" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/drawable/rounded_genre_bg.xml" value="0.15364583333333334" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/drawable/rounded_review_bg.xml" value="0.15364583333333334" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/drawable/rounded_white_bg.xml" value="0.18796296296296297" />
         <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/drawable/splash_bg.xml" value="0.14739583333333334" />
-        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/layout/activity_movie_detail.xml" value="0.12907608695652173" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/layout/activity_all_movies.xml" value="0.12907608695652173" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/layout/activity_all_revies.xml" value="0.176" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/layout/activity_movie_detail.xml" value="0.264" />
         <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/layout/activity_splash.xml" value="0.1" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/layout/all_reviews_holder.xml" value="0.264" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/layout/cast_layout.xml" value="0.12360688956433637" />
         <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/layout/cast_view_holder.xml" value="0.12907608695652173" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/layout/fragment_home.xml" value="0.12360688956433637" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/layout/genre_holder.xml" value="0.12907608695652173" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/layout/layout_no_movies_found.xml" value="0.12360688956433637" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/layout/login_activity.xml" value="0.10454155955441302" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/layout/movie_holder.xml" value="0.12907608695652173" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/layout/movie_holder_allmovies.xml" value="0.12907608695652173" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/layout/movie_list_layout.xml" value="0.12360688956433637" />
         <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/layout/production_company_holder.xml" value="0.12907608695652173" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/layout/production_company_layout.xml" value="0.12360688956433637" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/layout/review_text_layout.xml" value="0.10454155955441302" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/layout/reviews_holder.xml" value="0.144" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/layout/reviews_layout.xml" value="0.264" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/layout/similar_movies_layout.xml" value="0.12360688956433637" />
+        <entry key="..\:/Users/jashwin-pt4315/movieReviewApp/TMDBRatingApp/app/src/main/res/layout/toolbar.xml" value="0.12760416666666666" />
       </map>
     </option>
   </component>

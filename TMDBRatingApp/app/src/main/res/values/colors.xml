@@ -10,7 +10,7 @@
     <color name="light_gray">#AEABAB</color>
     <color name="tmdb_primary">#0D253F</color>
     <color name="app_accent">#615EB9</color>
-    <color name="secondary_text">#A9222222</color>
+    <color name="secondary_text">#A91B1A1A</color>
     <color name="primary_text">@color/black</color>
     <color name="tmdb_secondary">#16336E</color>
     <color name="color_primary">#16416E</color>

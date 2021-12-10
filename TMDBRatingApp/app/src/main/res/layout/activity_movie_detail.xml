@@ -8,15 +8,6 @@
     android:background="@color/grey_layout_bg"
     android:orientation="vertical">
 
-    <ProgressBar
-        android:id="@+id/progress_circular_movie_detail"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="20dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="480dp"
-        android:visibility="visible" />
-
     <include
         android:id="@+id/movie_detail_toolbar"
         layout="@layout/toolbar" />
@@ -33,18 +24,28 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <ProgressBar
+                android:id="@+id/progress_circular_movie_detail"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="12dp"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.553"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/btn_watch_list" />
+
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btn_watch_list"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="32dp"
-                android:layout_marginEnd="24dp"
+                android:layout_marginTop="36dp"
+                android:layout_marginEnd="32dp"
                 android:background="@drawable/ic_watchlist_grey"
                 android:foreground="?attr/selectableItemBackground"
-                app:layout_constraintEnd_toStartOf="@+id/btn_favorite"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toEndOf="@+id/iv_poster"
+                app:layout_constraintEnd_toEndOf="@+id/tv_duration"
+                app:layout_constraintStart_toStartOf="@+id/tv_duration"
                 app:layout_constraintTop_toBottomOf="@+id/tv_duration"
                 tools:ignore="UnusedAttribute" />
 
@@ -86,9 +87,9 @@
             <ImageView
                 android:id="@+id/iv_poster"
                 android:layout_width="125dp"
-                android:transitionName="iv_movie_poster"
                 android:layout_height="175dp"
                 android:layout_marginTop="264dp"
+                android:transitionName="iv_movie_poster"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -172,7 +173,7 @@
                 android:id="@+id/cg_geners"
                 android:layout_width="250dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="25dp"
+                android:layout_marginStart="32dp"
                 android:layout_marginTop="260dp"
                 android:layout_marginEnd="16dp"
                 app:chipSpacingHorizontal="30dp"
@@ -219,25 +220,37 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/layout_similar_movies" />
+                app:layout_constraintTop_toBottomOf="@+id/layout_similar_movies"
+                app:layout_constraintVertical_bias="0.0" />
+
+            <include
+                android:id="@+id/layout_reviews"
+                layout="@layout/reviews_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/layout_production_company" />
 
             <androidx.appcompat.widget.AppCompatImageButton
                 android:id="@+id/btn_favorite"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:layout_marginTop="60dp"
-                android:layout_marginEnd="100dp"
+                android:layout_marginTop="62dp"
                 android:background="@drawable/ic_favorite_grey"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.954"
-                app:layout_constraintStart_toEndOf="@+id/iv_poster"
+                app:layout_constraintEnd_toEndOf="@+id/tv_year"
+                app:layout_constraintStart_toStartOf="@+id/tv_year"
                 app:layout_constraintTop_toBottomOf="@+id/cg_geners" />
 
             <com.example.tmdbRatingApp.ui.view.AppTextView
                 android:id="@+id/tv_year"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="10dp"
                 android:layout_marginEnd="120dp"
                 android:layout_marginBottom="45dp"
                 android:textColor="@color/secondary_text"

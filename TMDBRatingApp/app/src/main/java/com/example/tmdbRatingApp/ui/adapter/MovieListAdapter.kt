@@ -1,25 +1,31 @@
 package com.example.tmdbRatingApp.ui.adapter
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.example.tmdbRatingApp.R
+import com.example.tmdbRatingApp.extensions.loadImage
 import com.example.tmdbRatingApp.model.Movie
 import com.example.tmdbRatingApp.ui.view.AppTextView
 import com.example.tmdbRatingApp.utils.Constants
 import com.example.tmdbRatingApp.utils.MyDiffUtil
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MovieListAdapter(
     val context: Context,
     private val clickListener: MovieOnClickListener,
-    val type: Int = 0
+    val type: Int = 0,
 ) : RecyclerView.Adapter<MovieListAdapter.MovieHolder>() {
-    var oldMovieList: List<Movie> = listOf()
+    private var oldMovieList: List<Movie> = listOf()
+    var recyclerView: RecyclerView? = null
 
     companion object {
         const val POPULAR = 1
@@ -46,12 +52,15 @@ class MovieListAdapter(
         holder.title.text = movie.title
         holder.rating.text = movie.vote_average.toString()
 
-           holder.releaserYear.text = if (!movie.release_date.isNullOrBlank()) movie.release_date.slice(0..3) else "not released"
+        holder.releaserYear.text =
+            if (!movie.release_date.isNullOrBlank()) movie.release_date.slice(0..3) else "not released"
         val url = Constants.IMAGE_BASE_URL + movie.poster_path
-        Glide.with(context)
-            .load(url)
-            .placeholder(R.drawable.ic_default_movie)
-            .into(holder.poster)
+//        Glide.with(context)
+//            .load(url)
+//            .placeholder(R.drawable.ic_default_movie)
+//            .into(holder.poster)
+        (context as AppCompatActivity).loadImage(url, holder.poster, R.drawable.ic_default_movie)
+
         holder.layout.setOnClickListener {
             clickListener.onClick(oldMovieList[position], holder)
         }
@@ -63,13 +72,25 @@ class MovieListAdapter(
     }
 
     fun setMoviesList(newList: List<Movie>) {
-        val myDiff = MyDiffUtil(oldMovieList, newList)
-        val diffResult = DiffUtil.calculateDiff(myDiff)
-        oldMovieList = newList
-        diffResult.dispatchUpdatesTo(this)
+        if (isBothListsAreDifferent(newList)) {
+            oldMovieList = newList
+            notifyDataSetChanged()
+            recyclerView?.scrollToPosition(0)
+        }
+    }
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+        this.recyclerView = recyclerView
     }
 
     interface MovieOnClickListener {
         fun onClick(movie: Movie, holder: MovieHolder)
+    }
+
+    private fun isBothListsAreDifferent(newList: List<Movie>): Boolean {
+        return !(newList.size <= oldMovieList.size && oldMovieList.containsAll(
+            newList
+        ))
     }
 }

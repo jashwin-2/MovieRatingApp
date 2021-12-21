@@ -59,7 +59,7 @@ class FavoriteFragment : Fragment(R.layout.fragment_favorite),
 
         favAdapter = AllMovieListAdapter(requireContext(), this)
         addObservers()
-
+        movieViewModel.getFavoriteMovies(accountId,sessionId)
         setClickListenerToProfileIv(view)
         setUpRecyclerView()
         addNetworkStateObserver()

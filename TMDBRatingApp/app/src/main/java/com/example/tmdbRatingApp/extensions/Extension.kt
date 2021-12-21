@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
-import com.bumptech.glide.Glide
+import com.example.imageloading.CustomImageLoader
 import com.example.tmdbRatingApp.R
 
 fun AppCompatActivity.hideActionBar() {
@@ -32,10 +32,13 @@ fun AppCompatActivity.hideActionBar() {
 }
 
 fun AppCompatActivity.loadImage(url: String, view: ImageView, defaultImage: Int = R.drawable.ic_default_movie) {
-    Glide.with(this)
-        .load(url)
-        .placeholder(defaultImage)
-        .into(view)
+
+    val imageLoader: CustomImageLoader =  CustomImageLoader.getInstance(this)
+    imageLoader.displayImage(url,view,defaultImage)
+
+//    Glide.with(this)
+//        .load(url)
+//        .submit()
 }
 
 fun FragmentManager.switch(containerId: Int, newFrag: Fragment, tag: String) {

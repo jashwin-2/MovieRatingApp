@@ -21,7 +21,7 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_all_movies.*
 import kotlinx.android.synthetic.main.toolbar.view.*
 
-class   AllMoviesActivity : AppCompatActivity(), MovieListOnClickListener {
+class AllMoviesActivity : AppCompatActivity(), MovieListOnClickListener {
     lateinit var movieViewModel: MovieViewModel
     lateinit var adapter: AllMovieListAdapter
     lateinit var snackbar: Snackbar
@@ -31,6 +31,8 @@ class   AllMoviesActivity : AppCompatActivity(), MovieListOnClickListener {
     lateinit var myScrollListener: MyScrollListener
     lateinit var toolbar: Toolbar
     var comingFromNoInternet = false
+    var loadingPagination = false
+    var firstLoad = true
 
 
     companion object {
@@ -91,7 +93,10 @@ class   AllMoviesActivity : AppCompatActivity(), MovieListOnClickListener {
                 showNoConnectionSnackBar()
             else if (it && comingFromNoInternet) {
                 showBackToOnlineSnackBar()
-                refresh()
+                if (loadingPagination)
+                    callCorrespondingMovieType(type)
+                else
+                    refresh()
             }
         }
     }
@@ -112,6 +117,7 @@ class   AllMoviesActivity : AppCompatActivity(), MovieListOnClickListener {
         adapter.clearRecyclerView()
         recyclerView.scrollToPosition(0)
         myScrollListener.isLastPage = false
+        firstLoad = true
     }
 
     private fun showNoConnectionSnackBar() {
@@ -166,7 +172,6 @@ class   AllMoviesActivity : AppCompatActivity(), MovieListOnClickListener {
     }
 
     private fun addObserver(data: MutableLiveData<Resource<MovieListResponse>>) {
-        var firstLoad = true
         data.observe(this) {
             when (it) {
                 is Resource.Success -> {
@@ -204,6 +209,7 @@ class   AllMoviesActivity : AppCompatActivity(), MovieListOnClickListener {
     }
 
     private fun showLoadOfflineDataSnackBar(movies: List<Movie>) {
+        loadingPagination = true
         Snackbar.make(
             this.layout_all_movies,
             "No Connection",
@@ -211,6 +217,7 @@ class   AllMoviesActivity : AppCompatActivity(), MovieListOnClickListener {
         ).apply {
 
             setAction("Load Old Data") {
+                loadingPagination = false
                 myScrollListener.isLastPage = true
                 adapter.clearRecyclerView()
                 recyclerView.scrollToPosition(0)
@@ -261,7 +268,7 @@ class   AllMoviesActivity : AppCompatActivity(), MovieListOnClickListener {
     }
 
     override fun onClick(movie: Movie, holder: AllMovieListAdapter.ViewHolder) {
-       startMovieDetailActivity(this , movie , holder.poster)
+        startMovieDetailActivity(this, movie, holder.poster)
     }
 
 }

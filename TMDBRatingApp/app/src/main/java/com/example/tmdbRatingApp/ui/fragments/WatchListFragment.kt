@@ -56,7 +56,7 @@ class WatchListFragment : Fragment(R.layout.fragment_favorite),
 
         watchAdapter = AllMovieListAdapter(requireContext(), this)
         addObservers()
-
+        movieViewModel.getWatchListMovies(accountId, sessionId)
         setClickListenerToProfileIv(view)
         setUpRecyclerView()
         addNetworkStateObserver()
@@ -136,6 +136,6 @@ class WatchListFragment : Fragment(R.layout.fragment_favorite),
     }
 
     override fun onClick(movie: Movie, holder: AllMovieListAdapter.ViewHolder) {
-        startMovieDetailActivity(requireActivity() , movie ,holder.poster)
+        startMovieDetailActivity(requireActivity(), movie, holder.poster)
     }
 }

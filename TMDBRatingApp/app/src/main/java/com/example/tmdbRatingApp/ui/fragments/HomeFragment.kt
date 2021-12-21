@@ -225,7 +225,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), MovieListAdapter.MovieOnC
                 resource.data?.let { it1 -> adapter.setMoviesList((it1.results.subList(0,20)).toList()) }
             }
             is Resource.Error -> {
-                val list = resource.data?.results
+                val list = resource.data?.results?.subList(0,20)
                 if (!(list.isNullOrEmpty())) {
                     setProgressBarStatus(adapter.type, false)
                     adapter.setMoviesList(list.toList())

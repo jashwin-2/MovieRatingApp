@@ -399,7 +399,12 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
         tv_rating.text = "${movie.vote_average} / 10"
         tv_overview.text = movie.overview
         tv_duration.text = movie.runtime.toString() + " min"
-        tv_year.text = movie.release_date.slice(0..3)
+        tv_year.text = movie.release_date.run {
+            if (length>=3)
+                slice(0..3)
+            else
+                "Not released"
+        }
     }
 
 
@@ -512,7 +517,6 @@ class MovieDetailActivity : AppCompatActivity(), MovieListAdapter.MovieOnClickLi
         }
         val requestOptions = RequestOptions.placeholderOf(R.drawable.ic_default_movie)
             .dontTransform()
-            .onlyRetrieveFromCache(true)
         Glide.with(this)
             .load(url)
             .listener(listener)

@@ -6,10 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmdbRatingApp.R
+import com.example.tmdbRatingApp.extensions.loadImage
 import com.example.tmdbRatingApp.model.Movie
 import com.example.tmdbRatingApp.ui.view.AppTextView
 import com.example.tmdbRatingApp.ui.view.AppTextViewBold
@@ -42,10 +44,14 @@ class AllMovieListAdapter(
         val movie = oldMovies[position]
         holder.title.text = movie.title
         val url = Constants.IMAGE_BASE_URL + movie.poster_path
-        Glide.with(context)
-            .load(url)
-            .placeholder(R.drawable.ic_default_movie)
-            .into(holder.poster)
+
+//        Glide.with(context)
+//            .load(url)
+//            .placeholder(R.drawable.ic_default_movie)
+//            .into(holder.poster)
+
+       //Caching without glide
+        (context as AppCompatActivity).loadImage(url,holder.poster,R.drawable.ic_default_movie)
 
         holder.layout.setOnClickListener {
             clickListener.onClick(movie , holder)
